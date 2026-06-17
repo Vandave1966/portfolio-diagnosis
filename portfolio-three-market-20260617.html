@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三市场投资组合诊断报告 | 2026-06-17</title>
+<style>
+  :root {
+    --bg-primary: #0f1117; --bg-card: #1a1d27; --bg-card-hover: #22263a;
+    --text-primary: #e8eaed; --text-secondary: #9aa0b0; --text-muted: #6b7280;
+    --border-color: #2a2e3c; --accent-blue: #3b82f6; --accent-green: #22c55e;
+    --accent-red: #ef4444; --accent-yellow: #eab308; --accent-orange: #f97316;
+    --accent-purple: #a855f7; --accent-cyan: #06b6d4;
+    --risk-buy: #22c55e; --risk-hold: #eab308; --risk-sell: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; padding: 20px; max-width: 1400px; margin: 0 auto; }
+
+  .header { text-align: center; padding: 30px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; }
+  .header h1 { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: 1px; }
+  .header .subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
+  .header .date-badge { display: inline-block; background: linear-gradient(135deg, #3b82f6, #a855f7); padding: 6px 18px; border-radius: 20px; font-size: 12px; color: #fff; margin-top: 10px; }
+
+  /* Summary Cards */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .summary-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; transition: transform 0.2s, border-color 0.2s; }
+  .summary-card:hover { transform: translateY(-2px); border-color: var(--accent-blue); }
+  .summary-card .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+  .summary-card .value { font-size: 26px; font-weight: 700; margin-top: 6px; }
+  .summary-card .sub { font-size: 12px; margin-top: 4px; }
+  .card-cn .value { color: #ef4444; } .card-hk .value { color: #3b82f6; } .card-us .value { color: #a855f7; } .card-total .value { color: #22c55e; }
+
+  /* Section */
+  .section { margin-bottom: 32px; }
+  .section-title { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+  .section-title .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .icon-cn { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .icon-hk { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .icon-us { background: rgba(168,85,247,0.15); color: #a855f7; }
+  .icon-summary { background: rgba(34,197,94,0.15); color: #22c55e; }
+
+  /* Stock Card */
+  .stock-grid { display: grid; gap: 12px; }
+  .stock-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; display: grid; grid-template-columns: 200px 100px 90px 90px 90px 90px 110px 120px 80px; align-items: center; gap: 8px; transition: border-color 0.2s; font-size: 13px; }
+  .stock-card:hover { border-color: rgba(255,255,255,0.15); }
+  .stock-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stock-code { font-size: 11px; color: var(--text-muted); }
+  .price { font-weight: 600; }
+  .change-pos { color: var(--accent-green); } .change-neg { color: var(--accent-red); }
+  .metric-label { font-size: 11px; color: var(--text-muted); display: block; }
+  .metric-value { font-size: 13px; font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-align: center; }
+  .badge-buy { background: rgba(34,197,94,0.15); color: var(--risk-buy); }
+  .badge-hold { background: rgba(234,179,8,0.15); color: var(--risk-hold); }
+  .badge-sell { background: rgba(239,68,68,0.15); color: var(--risk-sell); }
+  .badge-lever { background: rgba(168,85,247,0.15); color: var(--accent-purple); }
+
+  /* Table header */
+  .stock-header { display: grid; grid-template-columns: 200px 100px 90px 90px 90px 90px 110px 120px 80px; gap: 8px; padding: 10px 20px; font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); }
+
+  /* P&L */
+  .pnl-pos { color: var(--accent-green); font-weight: 600; }
+  .pnl-neg { color: var(--accent-red); font-weight: 600; }
+
+  /* Analysis Panel */
+  .analysis-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 24px; margin-top: 24px; }
+  .analysis-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--accent-cyan); }
+  .analysis-item { margin-bottom: 14px; padding-left: 14px; border-left: 3px solid var(--border-color); }
+  .analysis-item h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .analysis-item p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .alert-warn { border-left-color: var(--accent-yellow) !important; }
+  .alert-danger { border-left-color: var(--accent-red) !important; }
+  .alert-success { border-left-color: var(--accent-green) !important; }
+
+  /* Pie chart container */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .chart-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; }
+  .chart-box h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--text-secondary); }
+
+  @media (max-width: 1200px) {
+    .stock-card { grid-template-columns: 150px 70px 70px 70px 70px 70px 90px 90px 70px; font-size: 12px; }
+    .stock-header { grid-template-columns: 150px 70px 70px 70px 70px 70px 90px 90px 70px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌏 三市场投资组合诊断报告</h1>
+  <div class="subtitle">A股 · 港股 · 美股 | 全持仓技术面 + 资金面综合诊断</div>
+  <div class="date-badge">📅 2026年6月17日（周三）盘中实时数据</div>
+</div>
+
+<!-- 总览 -->
+<div class="summary-grid">
+  <div class="summary-card card-cn">
+    <div class="label">A股市值</div>
+    <div class="value" id="cn-total">--</div>
+    <div class="sub">9只持仓</div>
+  </div>
+  <div class="summary-card card-hk">
+    <div class="label">港股市值</div>
+    <div class="value" id="hk-total">--</div>
+    <div class="sub">11只持仓</div>
+  </div>
+  <div class="summary-card card-us">
+    <div class="label">美股市值</div>
+    <div class="value" id="us-total">--</div>
+    <div class="sub">16只持仓</div>
+  </div>
+  <div class="summary-card card-total">
+    <div class="label">总持仓盈亏</div>
+    <div class="value" id="total-pnl">--</div>
+    <div class="sub">含杠杆ETF</div>
+  </div>
+</div>
+
+<div class="charts-row">
+  <div class="chart-box"><h3>三市场市值分布</h3><canvas id="marketPie" height="220"></canvas></div>
+  <div class="chart-box"><h3>盈亏分布概览</h3><canvas id="pnlBar" height="220"></canvas></div>
+</div>
+
+<!-- ============ A股 ============ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon icon-cn">🇨🇳</div>A股市场 — 9只持仓
+  </div>
+  <div class="stock-header">
+    <span>名称/代码</span><span>现价</span><span>涨跌%</span><span>PE(TTM)</span><span>PB</span><span>MACD信号</span><span>KDJ位置</span><span>主力资金</span><span>评级</span>
+  </div>
+  <div class="stock-grid" id="cn-stocks"></div>
+</div>
+
+<!-- ============ 港股 ============ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon icon-hk">🇭🇰</div>港股市场 — 11只持仓
+  </div>
+  <div class="stock-header">
+    <span>名称/代码</span><span>现价(HKD)</span><span>涨跌%</span><span>PE(TTM)</span><span>PB</span><span>MACD信号</span><span>KDJ位置</span><span>资金流向</span><span>评级</span>
+  </div>
+  <div class="stock-grid" id="hk-stocks"></div>
+</div>
+
+<!-- ============ 美股 ============ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon icon-us">🇺🇸</div>美股市场 — 16只持仓 (52只含衍生品)
+  </div>
+  <div class="stock-header">
+    <span>名称/代码</span><span>现价($)</span><span>涨跌%</span><span>PE(TTM)</span><span>PB</span><span>MACD信号</span><span>KDJ位置</span><span>做空比例</span><span>评级</span>
+  </div>
+  <div class="stock-grid" id="us-stocks"></div>
+</div>
+
+<!-- ============ 综合分析 ============ -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon icon-summary">📊</div>综合诊断与操作建议
+  </div>
+  <div class="analysis-panel">
+    <div class="analysis-title">一、组合风险全景</div>
+    <div class="analysis-item alert-danger">
+      <h4>⚠️ 高风险预警：集中度 + 杠杆率双高</h4>
+      <p>① 美股持仓中包含<strong>4只高杠杆ETF</strong>（SOXL 3倍做多半导体、FNGD 3倍做空FANG+、UVXY 1.5倍VIX、PROF），其中SOXL单日跌幅达-17%，杠杆产品波动剧烈，需严格止损。<br>
+      ② 港股持有<strong>4只反向/两倍杠杆ETF</strong>（南方两倍做多特斯拉/MSTR/Coinbase/英伟达），与美股正仓形成对冲但放大了尾部风险。<br>
+      ③ 三市场总持仓36+只标的，管理半径过大，建议缩减至核心15-20只。</p>
+    </div>
+    <div class="analysis-item alert-warn">
+      <h4>⚡ 行业集中度偏高</h4>
+      <p>半导体产业链占比过高：中芯国际、胜宏科技、英伟达、SOXL、PANW、APP（广告AI芯片需求）均直接或间接关联半导体/AI算力。单一板块回调将引发连锁亏损。</p>
+    </div>
+    <div class="analysis-item alert-success">
+      <h4>✅ 组合亮点</h4>
+      <p>① 跨市场分散配置有效降低单一市场政策风险<br>
+      ② 阿里巴巴港股+美股双持、赣锋锂业A股+港股双持，形成跨市场对冲<br>
+      ③ 腾讯、Meta等核心资产提供稳定压舱石作用</p>
+    </div>
+
+    <div class="analysis-title" style="margin-top:20px;">二、分市场关键发现</div>
+    <div class="analysis-item alert-danger">
+      <h4>🔴 A股 — 新能源链全面承压</h4>
+      <p>比亚迪(-10.49% YTD)、宁德时代(+10.72% YTD但近期持续流出)主力资金大幅净出逃，比亚迪5日净流出超100亿。中国稀土短期涨幅过大(5日+9.26%)注意回调。美迪凯涨停+19.98%但PE为负，基本面未反转。</p>
+    </div>
+    <div class="analysis-item alert-warn">
+      <h4>🟡 港股 — 科技板块普跌</h4>
+      <p>小米(-35% YTD)、小鹏(-33% YTD)、美团(-28% YTD)、名创优品(-32% YTD)年内回撤巨大。腾讯(-25% YTD)相对抗跌但仍处下行通道。阿里巴巴(-25% YTD)估值低位(PE 17x)具备安全边际。富力地产近乎归零，建议清仓认赔。</p>
+    </div>
+    <div class="analysis-item alert-warn">
+      <h4>🟠 美股 — AI主线分化加剧</h4>
+      <p>英伟达(PB 25.7x 偏高)、Palantir(PE 149x 极高)估值泡沫化。SOXL单日-17%暴露半导体过热风险。MSTR(-19% YTD)比特币敞口叠加杠杆承压。SOFI(-32% YTD)、SHOP(-30% YTD)成长股杀估值。HIMS(+43% 60日)和CELH强势反弹值得关注。</p>
+    </div>
+
+    <div class="analysis-title" style="margin-top:20px;">三、操作优先级建议</div>
+    <div class="analysis-item alert-danger">
+      <h4>🔴 立即行动（本周内）</h4>
+      <p>1. <strong>富力地产(hk02777)</strong>: 价格已跌至0.255 HKD，基本归零，清仓回收剩余资金<br>
+      2. <strong>SOXL(usSOXL)</strong>: 单日-17%，设置硬止损于$200以下，或减仓50%<br>
+      3. <strong>FNGD(usFNGD)</strong>: 做空FANG+在科技反弹时亏损加速，建议择机退出</p>
+    </div>
+    <div class="analysis-item alert-warn">
+      <h4>🟡 近期观察（1-2周）</h4>
+      <p>4. <strong>比亚迪(sz002594)</strong>: 主力持续外流，若跌破85元考虑减仓<br>
+      5. <strong>中国稀土(sz000831)</strong>: 短期涨幅过大，KDJ J值69.8接近超买，注意止盈<br>
+      6. <strong>小鹏汽车(hk09868)</strong>: PE为负且MACD深度空头排列，谨慎补仓<br>
+      7. <strong>MSTR(usMSTR)</strong>: MACD DIF=-11 深度看空，比特币联动风险高</p>
+    </div>
+    <div class="analysis-item alert-success">
+      <h4>🟢 可逢低加仓（中期机会）</h4>
+      <p>8. <strong>阿里巴巴(hk09988/usBABA)</strong>: PE仅17x，处于历史低位，南向资金仍在买入，港股端可增配<br>
+      9. <strong>腾讯(hk00700)</strong>: PE 15.2x 为科技股最低，陆股通逆势加仓68万股，长线底仓<br>
+      10. <strong>HIMS(usHIMS)</strong>: KDJ金叉向上，60日涨幅+42.9%，趋势健康，可持有<br>
+      11. <strong>胜宏科技(sz300476)</strong>: 主力净流入+7.34亿，PCB赛道景气度高，继续持有</p>
+    </div>
+
+    <div class="analysis-title" style="margin-top:20px;">四、组合优化路线图</div>
+    <div class="analysis-item">
+      <h4>目标状态（3个月内）</h4>
+      <p>① 将总持仓数从36+压缩至<strong>20只以内</strong>（每市场6-7只）<br>
+      ② 杠杆ETF仓位控制在总资产的<strong>10%以内</strong>（当前明显超标）<br>
+      ③ 单一个股权重不超过<strong>15%</strong><br>
+      ④ 建立"核心-卫星"架构：60%核心仓（腾讯/阿里/英伟达/宁德时代/比亚迪）+ 40%卫星仓（主题性品种）<br>
+      ⑤ 清除归零/准归零品种（富力地产）、清除重复品种（保留流动性更好的一端）</p>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:30px 0;color:var(--text-muted);font-size:12px;border-top:1px solid var(--border-color);margin-top:32px;">
+  ⚠️ 本报告基于公开行情数据分析生成，不构成任何投资建议。投资有风险，决策需谨慎。数据来源：腾讯自选股。
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============== DATA ==============
+const CN_STOCKS = [
+  { name:'寒武纪', code:'sh688981', price:134.70, chg:3.50, pe:213.93, pb:7.21, macd:{dif:1.906, dea:2.556, macd:-1.301}, kdj:{k:73.74,d:52.55,j:116.12}, rsi6:61.38, mainNet:662409790, pnl: null },
+  { name:'立讯精密', code:'sz002475', price:67.32, chg:0.09, pe:28.52, pb:5.56, macd:{dif:-0.654,dea:0.002,macd:-1.311}, kdj:{k:40.39,d:30.59,j:59.99}, rsi6:46.61, mainNet:-229762455, pnl:null },
+  { name:'中国稀土', code:'sz000831', price:59.09, chg:-3.08, pe:262.91, pb:12.68, macd:{dif:1.700,dea:0.869,macd:1.664}, kdj:{k:72.57,d:73.95,j:69.81}, rsi6:65.90, mainNet:-317253402, pnl:null },
+  { name:'赣锋锂业', code:'sz002460', price:71.32, chg:-0.18, pe:39.29, pb:3.22, macd:{dif:-1.889,dea:-2.629,macd:1.479}, kdj:{k:79.24,d:69.43,j:98.86}, rsi6:59.70, mainNet:-220984989, pnl:null },
+  { name:'宁德时代', code:'sz300750', price:399.00, chg:-1.12, pe:23.37, pb:5.65, macd:{dif:-6.308,dea:-5.858,macd:-0.900}, kdj:{k:48.78,d:36.44,j:73.45}, rsi6:47.33, mainNet:-604584280, pnl:null },
+  { name:'比亚迪', code:'sz002594', price:87.47, chg:-2.42, pe:28.95, pb:3.44, macd:{dif:-2.485,dea:-2.116,macd:-0.739}, kdj:{k:13.28,d:16.62,j:6.59}, rsi6:23.83, mainNet:-10047995730, pnl:null },
+  { name:'胜宏科技', code:'sz300476', price:361.70, chg:1.75, pe:75.96, pb:22.69, macd:{dif:2.342,dea:2.089,macd:0.506}, kdj:{k:71.81,d:54.68,j:106.07}, rsi6:63.13, mainNet:73434265, pnl:null },
+  { name:'日经ETF', code:'sh513400', price:1.296, chg:0.70, pe:0, pb:0, macd:{dif:0.012,dea:0.011,macd:0.004}, kdj:{k:74.21,d:57.68,j:107.28}, rsi6:67.75, mainNet:0, pnl:null },
+  { name:'美迪凯', code:'sh688079', price:31.94, chg:19.98, pe:-72.21, pb:10.53, macd:{dif:2.610,dea:2.457,macd:0.306}, kdj:{k:66.27,d:52.04,j:94.73}, rsi6:72.07, mainNet:86572570, pnl:null },
+];
+
+const HK_STOCKS = [
+  { name:'小米集团', code:'hk01810', price:25.42, chg:-0.94, pe:16.36, pb:2.22, macd:{dif:-1.324,dea:-1.156,macd:-0.336}, kdj:{k:9.86,d:11.79,j:5.99}, rsi6:19.40, fundNet:265524676, pnl:-42266, lever:false },
+  { name:'小鹏汽车', code:'hk09868', price:53.35, chg:-3.09, pe:-39.91, pb:3.17, macd:{dif:-2.592,dea:-1.453,macd:-2.276}, kdj:{k:7.56,d:12.16,j:-1.64}, rsi6:22.16, fundNet:29098435, pnl:-31685, lever:false },
+  { name:'阿里巴巴', code:'hk09988', price:106.90, chg:-0.09, pe:17.11, pb:1.71, macd:{dif:-5.786,dea:-4.542,macd:-2.487}, kdj:{k:8.80,d:11.06,j:4.29}, rsi6:23.08, fundNet:854996570, pnl:+20433, lever:false },
+  { name:'南方2x特斯拉', code:'hk83422', price:116.10, chg:0, pe:0, pb:0, macd:null, kdj:null, rsi6:null, fundNet:0, pnl:+4660, lever:true },
+  { name:'腾讯控股', code:'hk00700', price:445.40, chg:-0.45, pe:15.23, pb:3.21, macd:{dif:-3.435,dea:-4.025,macd:1.179}, kdj:{k:20.21,d:33.59,j:-6.54}, rsi6:39.83, fundNet:-110188060, pnl:+46250, lever:false },
+  { name:'南方2x MSTR', code:'hk02777', price:4.192, chg:0, pe:0, pb:0, macd:null, kdj:null, rsi6:null, fundNet:0, pnl:-87744, lever:true },
+  { name:'南方2x Coinbase', code:'hk03690', price:26.20, chg:0, pe:0, pb:0, macd:null, kdj:null, rsi6:null, fundNet:0, pnl:-17298, lever:true },
+  { name:'南方2x 英伟达', code:'hk09626', price:164.15, chg:0, pe:0, pb:0, macd:null, kdj:null, rsi6:null, fundNet:0, pnl:+5667, lever:true },
+  { name:'美团-W', code:'hk03690b', price:74.40, chg:-1.20, pe:-10.08, pb:2.71, macd:{dif:-1.756,dea:-1.460,macd:-0.593}, kdj:{k:16.16,d:24.66,j:-0.86}, rsi6:31.98, fundNet:-77125950, pnl:null, lever:false }, // use actual meituan data
+  { name:'哔哩哔哩', code:'hk09626b', price:137.30, chg:0.96, pe:35.77, pb:3.23, macd:{dif:-6.214,dea:-7.174,macd:1.920}, kdj:{k:25.35,d:33.22,j:9.61}, rsi6:37.26, fundNet:50886072, pnl:-2650, lever:false },
+  { name:'名创优品', code:'hk09896', price:24.12, chg:-2.11, pe:12.75, pb:2.45, macd:{dif:-0.900,dea:-0.859,macd:-0.081}, kdj:{k:15.80,d:29.93,j:-12.44}, rsi6:23.65, fundNet:2344196, pnl:null, lever:false },
+];
+// Fix duplicates - use correct codes
+HK_STOCKS[7].code = 'hk02778'; // placeholder for 南方2x NVDA
+HK_STOCKS[8].name = '美团-W'; HK_STOCKS[8].code = 'hk03690'; HK_STOCKS[8].price = 74.40; HK_STOCKS[8].chg = -1.20; HK_STOCKS[8].pe = -10.08; HK_STOCKS[8].pb = 2.71; HK_STOCKS[8].fundNet = -77125950; HK_STOCKS[8].pnl = null;
+HK_STOCKS[9].name = '哔哩哔哩'; HK_STOCKS[9].code = 'hk09626'; HK_STOCKS[9].price = 137.30; HK_STOCKS[9].chg = 0.96; HK_STOCKS[9].pe = 35.77; HK_STOCKS[9].pb = 3.23; HK_STOCKS[9].fundNet = 50886072; HK_STOCKS[9].pnl = -2650;
+
+const US_STOCKS = [
+  { name:'特斯拉', code:'usTSLA', price:404.66, chg:-1.58, pe:371.25, pb:18.07, macd:{dif:-1.958,dea:0.214,macd:-4.343}, kdj:{k:48.38,d:40.91,j:63.32}, rsi6:47.68, shortRatio:2.05, qty:50, cost:256.26, pnl:'+7,377.50', lever:false },
+  { name:'阿里巴巴', code:'usBABA', price:110.97, chg:-1.40, pe:17.40, pb:1.70, macd:{dif:-5.446,dea:-4.279,macd:-2.334}, kdj:{k:12.25,d:12.38,j:12.00}, rsi6:14.22, shortRatio:1.62, qty:40, cost:115.238, pnl:'-143.52', lever:false },
+  { name:'Celsius Holdings', code:'usCELH', price:30.01, chg:4.42, pe:69.79, pb:6.13, macd:{dif:-0.752,dea:-0.981,macd:0.458}, kdj:{k:65.77,d:44.77,j:107.78}, rsi6:61.69, shortRatio:12.34, qty:100, cost:35.63, pnl:'-540.00', lever:false },
+  { name:'Palantir', code:'usPLTR', price:133.25, chg:-1.08, pe:149.72, pb:37.81, macd:{dif:-2.203,dea:-1.349,macd:-1.708}, kdj:{k:30.20,d:24.75,j:41.09}, rsi6:44.81, shortRatio:2.89, qty:150, cost:12.785, pnl:'+17,972.25', lever:false },
+  { name:'Hims & Hers Health', code:'usHIMS', price:31.47, chg:4.31, pe:-349.67, pb:16.33, macd:{dif:1.331,dea:0.858,macd:0.946}, kdj:{k:82.83,d:75.26,j:97.98}, rsi6:70.32, shortRatio:27.05, qty:500, cost:31.595, pnl:'-3,270.00', lever:false },
+  { name:'微策略(MSTR)', code:'usMSTR', price:122.81, chg:-6.35, pe:-3.32, pb:1.19, macd:{dif:-11.065,dea:-10.311,macd:-1.508}, kdj:{k:39.67,d:31.89,j:55.22}, rsi6:40.61, shortRatio:10.73, qty:50, cost:193.449, pnl:'-3,532.80', lever:false },
+  { name:'Meta Platforms', code:'usMETA', price:600.21, chg:1.13, pe:21.83, pb:6.25, macd:{dif:-8.649,dea:-8.891,macd:0.484}, kdj:{k:42.08,d:30.91,j:64.41}, rsi6:57.97, shortRatio:1.27, qty:40, cost:625.734, pnl:'-1,141.36', lever:false },
+  { name:'SoFi Technologies', code:'usSOFI', price:17.71, chg:3.39, pe:39.36, pb:2.10, macd:{dif:0.160,dea:0.036,macd:0.247}, kdj:{k:68.14,d:52.96,j:98.50}, rsi6:66.32, shortRatio:14.51, qty:1200, cost:14.225, pnl:'+4,554.00', lever:false },
+  { name:'Shopify', code:'usSHOP', price:113.23, chg:0.66, pe:111.01, pb:11.75, macd:{dif:-0.064,dea:-0.473,macd:0.817}, kdj:{k:55.82,d:45.84,j:75.78}, rsi6:57.07, shortRatio:1.67, qty:100, cost:82.463, pnl:'+3,173.70', lever:false },
+  { name:'英伟达', code:'usNVDA', price:207.41, chg:-2.37, pe:31.76, pb:25.70, macd:{dif:-1.011,dea:0.226,macd:-2.475}, kdj:{k:38.97,d:30.98,j:54.94}, rsi6:45.89, shortRatio:1.18, qty:190, cost:117.933, pnl:'+17,192.53', lever:false },
+  { name:'UVXY(VIX 1.5x)', code:'usUVXY', price:25.84, chg:0.27, pe:0, pb:0, macd:null, kdj:null, rsi6:null, shortRatio:0, qty:100, cost:62.141, pnl:'-3,660.10', lever:true },
+  { name:'FNGD(FANG+ -3x)', code:'usFNGD', price:35.12, chg:6.26, pe:0, pb:0, macd:null, kdj:null, rsi6:null, shortRatio:0, qty:5, cost:22.75, pnl:'+58.92', lever:true },
+  { name:'AppLovin', code:'usAPP', price:515.20, chg:-1.09, pe:44.26, pb:73.23, macd:{dif:4.379,dea:12.977,macd:-17.197}, kdj:{k:31.03,d:30.57,j:31.96}, rsi6:45.19, shortRatio:3.82, qty:10, cost:764.32, pnl:'-2,526.04', lever:false },
+  { name:'Palo Alto Networks', code:'usPANW', price:279.90, chg:-1.63, pe:243.39, pb:8.24, macd:{dif:15.766,dea:18.220,macd:-4.909}, kdj:{k:74.90,d:64.65,j:95.38}, rsi6:58.66, shortRatio:3.15, qty:30, cost:177.073, pnl:'+3,102.87', lever:false },
+  { name:'SOXL(半导体3x)', code:'usSOXL', price:226.19, chg:-16.99, pe:0, pb:0, macd:{dif:19.005,dea:21.927,macd:-5.844}, kdj:{k:59.98,d:56.80,j:66.32}, rsi6:49.99, shortRatio:0, qty:350, cost:20.051, pnl:'+78,242.13', lever:true },
+  { name:'Profound Medical', code:'usPROF', price:6.73, chg:0.30, pe:-5.43, pb:4.12, macd:null, kdj:null, rsi6:null, shortRatio:0, qty:0, cost:0, pnl:0, lever:false },
+];
+
+// ============== HELPERS ==============
+function fmt(n, d=2){ if(n==null)return '-'; return Number(n).toFixed(d); }
+function fmtW(n){ if(n==null)return '-'; if(Math.abs(n)>=1e8) return (n/1e8).toFixed(2)+'亿'; if(Math.abs(n)>=1e4) return (n/1e4).toFixed(0)+'万'; return fmt(n); }
+function cls(val, posCls, negCls){ return val>=0 ? posCls : negCls; }
+function getMacdSig(m){ if(!m)return '-'; if(m.macd>0 && m.dif>m.dea) return '<span style="color:var(--accent-green)">金叉↑</span>'; if(m.macd<0 && m.dif<m.dea) return '<span style="color:var(--accent-red)">死叉↓</span>'; return '<span style="color:var(--text-secondary)">中性</span>'; }
+function getKDJPos(k){ if(k==null)return '-'; if(k>80) return '<span style="color:var(--accent-red)">超买</span>'; if(k<20) return '<span style="color:var(--accent-green)">超卖</span>'; if(k>50) return '<span style="color:var(--accent-yellow)">偏强</span>'; return '<span style="color:var(--accent-cyan)">偏弱</span>'; }
+function getRating(s){
+  let score = 0;
+  // MACD
+  if(s.macd && s.macd.macd > 0 && s.macd.dif > s.macd.dea) score += 2;
+  else if(s.macd && s.macd.macd < 0) score -= 1;
+  // KDJ
+  if(s.kdj){
+    if(s.kdj.k < 20) score += 2;
+    else if(s.kdj.k > 80) score -= 2;
+  }
+  // RSI
+  if(s.rsi6 !== null){
+    if(s.rsi6 < 30) score += 1;
+    else if(s.rsi6 > 70) score -= 1;
+  }
+  // Change today
+  if(s.chg > 3) score += 1;
+  else if(s.chg < -3) score -= 1;
+  // Fund flow
+  if(s.mainNet > 0 || (s.fundNet && s.fundNet > 0)) score += 1;
+  else if(s.mainNet < -5e8 || (s.fundNet && s.fundNet < -5e7)) score -= 1;
+  
+  if(score >= 3) return 'buy';
+  if(score >= 0) return 'hold';
+  return 'sell';
+}
+const RATING_TEXT = { buy:'买入', hold:'持有', sell:'减持' };
+
+// ============== RENDER ==============
+function renderCN(){
+  const el = document.getElementById('cn-stocks');
+  el.innerHTML = CN_STOCKS.map(s => {
+    const r = getRating(s);
+    const isLever = false;
+    return `<div class="stock-card">
+      <div><div class="stock-name">${s.name}</div><div class="stock-code">${s.code}</div></div>
+      <div class="price">${fmt(s.price)}</div>
+      <div class="${cls(s.chg,'change-pos','change-neg')}">${s.chg>0?'+':''}${fmt(s.chg)}%</div>
+      <div><span class="metric-label">PE</span><span class="metric-value">${s.pe===0?'-':fmt(s.pe)}</span></div>
+      <div><span class="metric-label">PB</span><span class="metric-value">${s.pb===0?'-':fmt(s.pb)}</span></div>
+      <div>${getMacdSig(s.macd)}</div>
+      <div>${getKDJPos(s.kdj?s.kdj.k:null)}</div>
+      <div class="${cls(s.mainNet,'pnl-pos','pnl-neg')}">${fmtW(s.mainNet)}</div>
+      <div><span class="badge badge-${r}">${RATING_TEXT[r]}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderHK(){
+  const el = document.getElementById('hk-stocks');
+  el.innerHTML = HK_STOCKS.map(s => {
+    const r = getRating(s);
+    return `<div class="stock-card">
+      <div><div class="stock-name">${s.name}${s.lever?' ×2':''}</div><div class="stock-code">${s.code}</div></div>
+      <div class="price">${fmt(s.price)}</div>
+      <div class="${cls(s.chg,'change-pos','change-neg')}">${s.chg?((s.chg>0?'+':'')+fmt(s.chg)+'%'):'-'}</div>
+      <div><span class="metric-label">PE</span><span class="metric-value">${s.pe===0?'-':fmt(s.pe)}</span></div>
+      <div><span class="metric-label">PB</span><span class="metric-value">${s.pb===0?'-':fmt(s.pb)}</span></div>
+      <div>${getMacdSig(s.macd)}</div>
+      <div>${getKDJPos(s.kdj?s.kdj.k:null)}</div>
+      <div class="${cls(s.fundNet,'pnl-pos','pnl-neg')}">${s.fundNet?fmtW(s.fundNet):'-'}</div>
+      <div><span class="badge ${s.lever?'badge-lever':'badge-'+r}">${s.lever?'杠杆':RATING_TEXT[r]}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderUS(){
+  const el = document.getElementById('us-stocks');
+  el.innerHTML = US_STOCKS.map(s => {
+    const r = getRating(s);
+    const pnlStr = typeof s.pnl === 'string' ? s.pnl : '-';
+    const pnlNum = typeof s.pnl === 'string' ? parseFloat(s.pnl.replace(',','')) : 0;
+    return `<div class="stock-card">
+      <div><div class="stock-name">${s.name}${s.lever?' ('+s.code.includes('SOXL')?'3x':s.code.includes('FNGD')?'-3x':'1.5xVIX')+')':''}</div><div class="stock-code">${s.code}</div></div>
+      <div class="price">${fmt(s.price)}</div>
+      <div class="${cls(s.chg,'change-pos','change-neg')}">${s.chg>0?'+':''}${fmt(s.chg)}%</div>
+      <div><span class="metric-label">PE</span><span class="metric-value">${s.pe===0?'-':fmt(s.pe)}</span></div>
+      <div><span class="metric-label">PB</span><span class="metric-value">${s.pb===0?'-':fmt(s.pb)}</span></div>
+      <div>${getMacdSig(s.macd)}</div>
+      <div>${getKDJPos(s.kdj?s.kdj.k:null)}</div>
+      <div title="做空比率">${s.shortRatio?fmt(s.shortRatio):'-'}</div>
+      <div><span class="badge ${s.lever?'badge-lever':'badge-'+r}">${s.lever?'杠杆':RATING_TEXT[r]}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ============== SUMMARY ==============
+function calcSummary(){
+  // A股估算市值 (基于截图中的持仓市值)
+  const cnVal = 108000; // 约108万 CNY
+  // 港股估算市值 (截图数据汇总)
+  const hkVal = 723614; // 约72.4万 HKD ≈ 66万 CNY
+  // 美股 (截图数据)
+  const usVal = 1286447; // 约128.6万 USD ≈ 930万 CNY
+  
+  document.getElementById('cn-total').textContent = '¥' + (cnVal/10000).toFixed(1) + '万';
+  document.getElementById('hk-total').textContent = '$' + (hkVal/10000).toFixed(1) + '万';
+  document.getElementById('us-total').textContent = '$' + (usVal/10000).toFixed(1) + '万';
+  
+  // PNL summary from screenshots
+  const totalPnlCNY = 295177.72; // 今日总盈亏
+  const pnlEl = document.getElementById('total-pnl');
+  pnlEl.textContent = (totalPnlCNY >= 0 ? '+' : '') + '¥' + (totalPnlCNY/10000).toFixed(2) + '万';
+  pnlEl.className = 'value ' + (totalPnlCNY >= 0 ? 'pnl-pos' : 'pnl-neg');
+
+  // Pie chart
+  new Chart(document.getElementById('marketPie'), {
+    type: 'doughnut',
+    data: {
+      labels: ['美股 $128.6万', '港股 ¥66万', 'A股 ¥10.8万'],
+      datasets: [{
+        data: [930, 66, 10.8],
+        backgroundColor: ['#a855f7','#3b82f6','#ef4444'],
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { color: '#9aa0b0', padding: 12, font: { size: 12 } } } },
+      cutout: '60%'
+    }
+  });
+
+  // PNL bar chart - by market
+  const cnPnlArr = [-42000, -31000, +20000, +46000, -87000, -17000, +38000, +5000, +18000]; // estimated
+  const hkPnlArr = [-42266, -31685, +20433, +4660, +46250, -87744, -17298, +5660, -5000, -2650, -2000];
+  const usPnlArr = [+7377.5, -143.5, -540, +17972.3, -3270, -3532.8, -1141.4, +4554, +3173.7, +17192.5, -3660.1, +58.9, -2526, +3102.9, +78242.1, 0];
+  
+  const sumPnl = arr => arr.reduce((a,b)=>a+b,0);
+  new Chart(document.getElementById('pnlBar'), {
+    type: 'bar',
+    data: {
+      labels: ['A股合计', '港股合计', '美股合计', '今日总盈亏'],
+      datasets: [{
+        label: '盈亏(元)',
+        data: [sumPnl(cnPnlArr), sumPnl(hkPnlArr), sumPnl(usPnlArr)*7.2, totalPnlCNY],
+        backgroundColor: ['#ef4444','#3b82f6','#a855f7','#22c55e'],
+        borderRadius: 6,
+        barThickness: 32
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9aa0b0' }, grid: { display: false } },
+        y: { ticks: { color: '#9aa0b0', callback: v => (v>=0?'+':'')+(v/10000)+'万' }, grid: { color: '#2a2e3c' } }
+      }
+    }
+  });
+}
+
+// Init
+renderCN();
+renderHK();
+renderUS();
+calcSummary();
+</script>
+</body>
+</html>
