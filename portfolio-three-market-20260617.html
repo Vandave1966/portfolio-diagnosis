@@ -314,6 +314,9 @@ function getRating(s){
   return 'sell';
 }
 const RATING_TEXT = { buy:'买入', hold:'持有', sell:'减持' };
+function getLeverLabel(code){ if(code.indexOf('SOXL')>=0)return ' (3x)'; if(code.indexOf('FNGD')>=0)return ' (-3x)'; return ' (1.5xVIX)'; }
+function getLeverBadge(lever, rating){ return lever?'badge-lever':'badge-'+rating; }
+function getLeverText(lever, rating){ return lever?'杠杆':RATING_TEXT[rating]; }
 
 // ============== RENDER ==============
 function renderCN(){
@@ -340,7 +343,7 @@ function renderHK(){
   el.innerHTML = HK_STOCKS.map(s => {
     const r = getRating(s);
     return `<div class="stock-card">
-      <div><div class="stock-name">${s.name}${s.lever?' ×2':''}</div><div class="stock-code">${s.code}</div></div>
+      <div><div class="stock-name">${s.name}${s.lever?' x2':''}</div><div class="stock-code">${s.code}</div></div>
       <div class="price">${fmt(s.price)}</div>
       <div class="${cls(s.chg,'change-pos','change-neg')}">${s.chg?((s.chg>0?'+':'')+fmt(s.chg)+'%'):'-'}</div>
       <div><span class="metric-label">PE</span><span class="metric-value">${s.pe===0?'-':fmt(s.pe)}</span></div>
@@ -348,7 +351,7 @@ function renderHK(){
       <div>${getMacdSig(s.macd)}</div>
       <div>${getKDJPos(s.kdj?s.kdj.k:null)}</div>
       <div class="${cls(s.fundNet,'pnl-pos','pnl-neg')}">${s.fundNet?fmtW(s.fundNet):'-'}</div>
-      <div><span class="badge ${s.lever?'badge-lever':'badge-'+r}">${s.lever?'杠杆':RATING_TEXT[r]}</span></div>
+      <div><span class="badge ${getLeverBadge(s.lever,r)}">${getLeverText(s.lever,r)}</span></div>
     </div>`;
   }).join('');
 }
@@ -357,10 +360,9 @@ function renderUS(){
   const el = document.getElementById('us-stocks');
   el.innerHTML = US_STOCKS.map(s => {
     const r = getRating(s);
-    const pnlStr = typeof s.pnl === 'string' ? s.pnl : '-';
-    const pnlNum = typeof s.pnl === 'string' ? parseFloat(s.pnl.replace(',','')) : 0;
+    const lbl = s.lever ? getLeverLabel(s.code) : '';
     return `<div class="stock-card">
-      <div><div class="stock-name">${s.name}${s.lever?' ('+s.code.includes('SOXL')?'3x':s.code.includes('FNGD')?'-3x':'1.5xVIX')+')':''}</div><div class="stock-code">${s.code}</div></div>
+      <div><div class="stock-name">${s.name}${lbl}</div><div class="stock-code">${s.code}</div></div>
       <div class="price">${fmt(s.price)}</div>
       <div class="${cls(s.chg,'change-pos','change-neg')}">${s.chg>0?'+':''}${fmt(s.chg)}%</div>
       <div><span class="metric-label">PE</span><span class="metric-value">${s.pe===0?'-':fmt(s.pe)}</span></div>
@@ -368,7 +370,7 @@ function renderUS(){
       <div>${getMacdSig(s.macd)}</div>
       <div>${getKDJPos(s.kdj?s.kdj.k:null)}</div>
       <div title="做空比率">${s.shortRatio?fmt(s.shortRatio):'-'}</div>
-      <div><span class="badge ${s.lever?'badge-lever':'badge-'+r}">${s.lever?'杠杆':RATING_TEXT[r]}</span></div>
+      <div><span class="badge ${getLeverBadge(s.lever,r)}">${getLeverText(s.lever,r)}</span></div>
     </div>`;
   }).join('');
 }
@@ -393,7 +395,7 @@ function calcSummary(){
   pnlEl.className = 'value ' + (totalPnlCNY >= 0 ? 'pnl-pos' : 'pnl-neg');
 
   // Pie chart
-  new Chart(document.getElementById('marketPie'), {
+  try { new Chart(document.getElementById('marketPie'), {
     type: 'doughnut',
     data: {
       labels: ['美股 $128.6万', '港股 ¥66万', 'A股 ¥10.8万'],
@@ -409,7 +411,7 @@ function calcSummary(){
       plugins: { legend: { position: 'right', labels: { color: '#9aa0b0', padding: 12, font: { size: 12 } } } },
       cutout: '60%'
     }
-  });
+  }); } catch(e) { console.log('Chart not available:', e.message); }
 
   // PNL bar chart - by market
   const cnPnlArr = [-42000, -31000, +20000, +46000, -87000, -17000, +38000, +5000, +18000]; // estimated
@@ -417,7 +419,7 @@ function calcSummary(){
   const usPnlArr = [+7377.5, -143.5, -540, +17972.3, -3270, -3532.8, -1141.4, +4554, +3173.7, +17192.5, -3660.1, +58.9, -2526, +3102.9, +78242.1, 0];
   
   const sumPnl = arr => arr.reduce((a,b)=>a+b,0);
-  new Chart(document.getElementById('pnlBar'), {
+  try { new Chart(document.getElementById('pnlBar'), {
     type: 'bar',
     data: {
       labels: ['A股合计', '港股合计', '美股合计', '今日总盈亏'],
@@ -437,7 +439,7 @@ function calcSummary(){
         y: { ticks: { color: '#9aa0b0', callback: v => (v>=0?'+':'')+(v/10000)+'万' }, grid: { color: '#2a2e3c' } }
       }
     }
-  });
+  }); } catch(e) { console.log('Chart not available:', e.message); }
 }
 
 // Init
