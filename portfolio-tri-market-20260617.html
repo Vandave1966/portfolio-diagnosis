@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三市场持仓诊断报告 | A股+港股+美股 | 2026-06-17</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, 'Microsoft YaHei', sans-serif; background:#f5f7fa; color:#1a1a2e; line-height:1.6; }
+  .container { max-width:1200px; margin:0 auto; padding:24px; }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color:#fff; padding:32px 40px; border-radius:14px; margin-bottom:28px; }
+  .header h1 { font-size:28px; font-weight:700; margin-bottom:8px; }
+  .header .sub { font-size:14px; opacity:0.8; }
+  .header .market-badges { display:flex; gap:12px; margin-top:14px; flex-wrap:wrap; }
+  .market-badge { padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600; }
+  .m-a { background:rgba(255,255,255,0.2); color:#fff; }
+  .m-hk { background:rgba(255,255,255,0.2); color:#fff; }
+  .m-us { background:rgba(255,255,255,0.2); color:#fff; }
+  
+  /* Cards */
+  .card { background:#fff; border-radius:12px; padding:28px; margin-bottom:22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .card h2 { font-size:20px; font-weight:700; margin-bottom:18px; color:#16213e; border-bottom:2px solid #eef2f7; padding-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .card h3 { font-size:15px; font-weight:600; margin:18px 0 10px; color:#333; }
+  
+  /* Tables */
+  table { width:100%; border-collapse:collapse; font-size:13px; margin:10px 0 16px; }
+  th { background:#f0f4ff; text-align:left; padding:9px 10px; font-weight:600; color:#444; border-bottom:2px solid #dde4f0; white-space:nowrap; }
+  td { padding:9px 10px; border-bottom:1px solid #eef2f7; }
+  tr:hover td { background:#fafbff; }
+  
+  /* Colors */
+  .up { color:#e53e3e; font-weight:600; }
+  .down { color:#38a169; font-weight:600; }
+  .neutral { color:#718096; }
+  
+  /* Badges */
+  .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600; margin:2px 3px; }
+  .badge-green { background:#e6ffed; color:#22543d; }
+  .badge-yellow { background:#fffbea; color:#975a16; }
+  .badge-red { background:#ffeef0; color:#9b2c2c; }
+  .badge-blue { background:#ebf4ff; color:#2a4365; }
+  .badge-purple { background:#f3e8ff; color:#6b21a8; }
+  
+  /* Layout */
+  .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; }
+  @media(max-width:768px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
+  
+  /* Boxes */
+  .summary-box { background:#f8faff; border-left:4px solid #3b82f6; padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; font-size:14px; }
+  .warning-box { background:#fffbf0; border-left:4px solid #f59e0b; padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; font-size:14px; }
+  .danger-box { background:#fff5f5; border-left:4px solid #e53e3e; padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; font-size:14px; }
+  .info-row { display:flex; gap:16px; flex-wrap:wrap; margin:8px 0; }
+  .info-item { background:#f0f4ff; padding:8px 14px; border-radius:8px; font-size:13px; }
+  .info-item strong { color:#1a1a2e; }
+  .divider { border:none; border-top:1px dashed #dde4f0; margin:20px 0; }
+  
+  /* Metric Cards */
+  .metric-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:20px; }
+  .metric-card { background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%); border-radius:10px; padding:16px; text-align:center; }
+  .metric-card .val { font-size:24px; font-weight:700; color:#1a1a2e; }
+  .metric-card .label { font-size:12px; color:#666; margin-top:4px; }
+  
+  /* Tabs */
+  .tabs { display:flex; gap:0; margin-bottom:18px; border-radius:8px; overflow:hidden; }
+  .tab { padding:10px 24px; font-size:14px; font-weight:600; cursor:pointer; border:none; background:#eef2f7; color:#555; transition:all .2s; }
+  .tab.active { background:#3b82f6; color:#fff; }
+  .tab:hover:not(.active) { background:#dde4f0; }
+  
+  .section-header { font-size:16px; font-weight:700; color:#0f3460; padding:12px 16px; background:#f0f4ff; border-radius:8px; margin:20px 0 14px; }
+  
+  /* Risk bar */
+  .risk-bar { height:8px; border-radius:4px; background:#eef2f7; margin:6px 0; }
+  .risk-fill { height:8px; border-radius:4px; transition:width .5s; }
+  
+  .footer { text-align:center; color:#888; font-size:12px; padding:20px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ====== HEADER ====== -->
+<div class="header">
+  <h1>三市场持仓诊断报告</h1>
+  <div class="sub">A股 + 港股 + 美股 | 数据截至 2026-06-17 收盘 | 基于 westock-data 实时行情、资金流向与技术指标</div>
+  <div class="market-badges">
+    <span class="market-badge m-a">A股 × 9</span>
+    <span class="market-badge m-hk">港股 × 11</span>
+    <span class="market-badge m-us">美股 × 15</span>
+    <span style="color:rgba(255,255,255,0.7); font-size:13px; padding-top:5px;">合计 35 只持仓</span>
+  </div>
+</div>
+
+<!-- ====== 总览仪表盘 ====== -->
+<div class="card">
+  <h2>一、三市场持仓总览</h2>
+  
+  <div class="grid-3">
+    <div class="metric-card">
+      <div class="val" style="color:#e53e3e;">A股 × 9</div>
+      <div class="label">持仓数量 | 半导体+新能源+周期</div>
+      <div style="margin-top:6px; font-size:12px; color:#666;">集中度偏高</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:#dd6b20;">港股 × 11</div>
+      <div class="label">持仓数量 | 科技+杠杆ETF+锂</div>
+      <div style="margin-top:6px; font-size:12px; color:#666;">杠杆ETF风险突出</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:#38a169;">美股 × 15</div>
+      <div class="label">持仓数量 | 科技+半导体+金融科技</div>
+      <div style="margin-top:6px; font-size:12px; color:#666;">数量最多，持仓分散</div>
+    </div>
+  </div>
+
+  <div class="warning-box" style="margin-top:16px;">
+    <strong>组合特征速览</strong>:
+    <ul style="margin:8px 0 0 18px;">
+      <li><strong>科技半导体为主轴</strong>: A股（寒武纪/中芯/胜宏）+ 港股（腾讯/阿里/小米）+ 美股（NVDA/SOXL/PLTR/PANW），占比较高</li>
+      <li><strong>杠杆ETF风险敞口</strong>: 港股4只南方两倍做多ETF + 美股SOXL(3倍)/UVXY(1.5倍)/FNGD(3倍反向)，共计<strong>7只杠杆产品</strong></li>
+      <li><strong>新能源分散三市</strong>: A股(赣锋/宁德/比亚迪) + 港股(赣锋H/小鹏) + 美股(TSLA)</li>
+      <li><strong>高波动特征</strong>: 杠杆ETF + 小盘股(HIMS/SOFI/CELH) + 高PE科技(PLTR/APP) 构成组合弹性来源</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== 港股诊断 ====== -->
+<div class="card">
+  <h2>二、港股持仓诊断 <span style="font-size:13px;font-weight:400;color:#888;">(HK$)</span></h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>代码</th><th>名称</th><th>现价</th><th>今日%</th><th>20日%</th><th>60日%</th><th>年至今%</th>
+        <th>PE</th><th>PB</th><th>主力净流入</th><th>技术信号</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 小米 -->
+      <tr>
+        <td><strong>01810</strong></td><td>小米集团-W</td>
+        <td>25.42</td>
+        <td class="down">-0.94%</td><td class="down">-17.04%</td><td class="down">-27.66%</td><td class="down">-35.32%</td>
+        <td>16.4x</td><td>2.2x</td><td class="up">+0.19亿</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-red">KDJ弱</span></td>
+      </tr>
+      <!-- 小鹏 -->
+      <tr>
+        <td><strong>09868</strong></td><td>小鹏汽车-W</td>
+        <td>53.35</td>
+        <td class="down">-3.09%</td><td class="down">-8.80%</td><td class="down">-29.48%</td><td class="down">-32.77%</td>
+        <td>亏损</td><td>3.2x</td><td class="up">+0.38亿</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-red">KDJ弱</span></td>
+      </tr>
+      <!-- 阿里巴巴 -->
+      <tr>
+        <td><strong>09988</strong></td><td>阿里巴巴-W</td>
+        <td>106.90</td>
+        <td class="down">-0.09%</td><td class="down">-19.18%</td><td class="down">-21.78%</td><td class="down">-24.60%</td>
+        <td>17.1x</td><td>1.7x</td><td class="down">-4.02亿</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-red">KDJ弱</span></td>
+      </tr>
+      <!-- 腾讯 -->
+      <tr>
+        <td><strong>00700</strong></td><td>腾讯控股</td>
+        <td>445.40</td>
+        <td class="down">-0.45%</td><td class="down">-3.17%</td><td class="down">-18.31%</td><td class="down">-24.98%</td>
+        <td>15.2x</td><td>3.2x</td><td class="down">-6.49亿</td>
+        <td><span class="badge badge-yellow">MACD金叉中</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+      <!-- 赣锋锂业H -->
+      <tr>
+        <td><strong>01772</strong></td><td>赣锋锂业</td>
+        <td>60.55</td>
+        <td class="neutral">0.00%</td><td class="down">-12.85%</td><td class="up">+2.84%</td><td class="up">+16.94%</td>
+        <td>29.5x</td><td>2.4x</td><td class="up">+0.19亿</td>
+        <td><span class="badge badge-green">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <!-- 哔哩哔哩 -->
+      <tr>
+        <td><strong>09626</strong></td><td>哔哩哔哩-W</td>
+        <td>137.30</td>
+        <td class="up">+0.96%</td><td class="down">-12.04%</td><td class="down">-34.43%</td><td class="down">-28.82%</td>
+        <td>35.8x</td><td>3.2x</td><td class="up">+0.42亿</td>
+        <td><span class="badge badge-yellow">MACD金叉</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+      <!-- 杠杆ETF -->
+      <tr style="background:#fffbf0;">
+        <td><strong>07226</strong></td><td>南方两倍做多特斯拉</td>
+        <td>116.10</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+        <td><span class="badge badge-purple">杠杆ETF</span></td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><strong>—</strong></td><td>南方两倍做多MSTR</td>
+        <td>4.192</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+        <td><span class="badge badge-purple">杠杆ETF</span> <span class="badge badge-red">⚠浮亏大</span></td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><strong>—</strong></td><td>南方两倍做多Coinbase</td>
+        <td>26.20</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+        <td><span class="badge badge-purple">杠杆ETF</span></td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><strong>—</strong></td><td>南方两倍做多英伟达</td>
+        <td>164.15</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+        <td><span class="badge badge-purple">杠杆ETF</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="danger-box" style="margin-top:16px;">
+    <strong>港股杠杆ETF风险警告</strong>: 你持有<strong>4只南方两倍做多系列ETF</strong>（特斯拉/MSTR/Coinbase/英伟达），且MSTR做多ETF持仓盈亏-87,744港元，亏损较大。
+    <ul style="margin:8px 0 0 18px;">
+      <li>杠杆ETF存在<strong>每日再平衡损耗(decay)</strong>，不适合长期持有</li>
+      <li>南方两倍做多MSTR现价仅4.192，属于深度价外产品，波动极大</li>
+      <li>这些产品<strong>没有基本面分析价值</strong>，纯属方向性投机</li>
+      <li><strong>强烈建议</strong>: 将杠杆ETF仓位控制在总组合5%以内，MSTR做多ETF如反弹建议止损</li>
+    </ul>
+  </div>
+
+  <div class="section-header">港股核心持仓深度分析</div>
+
+  <!-- 腾讯 -->
+  <h3>腾讯控股 (00700) — <span class="badge badge-blue">核心压舱石，估值合理</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: HK$445.40 | <strong>市值</strong>: 4.06万亿港元</p>
+      <p><strong>PE 15.2x</strong> · PB 3.2x · 股息率 1.19%</p>
+      <p><strong>52周高</strong>: 677.7 | <strong>52周低</strong>: 420.4</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-3.44, DEA=-4.03, 柱=+1.18（金叉萌芽）</p>
+      <p><strong>KDJ</strong>: K=20.2, D=33.6, J=-6.5（严重超卖区反弹）</p>
+      <p><strong>资金</strong>: 主力-6.5亿，但南向资金日增+3.06亿</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: PE 15.2x在腾讯历史上处于合理偏低区间。MACD柱转正+KDJ从超卖区反弹，短期有技术修复需求。南向资金持续买入（日增3.06亿），中长线资金认可当前估值。<strong>建议作为核心底仓坚定持有</strong>，若回调至420附近可加仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 阿里巴巴 -->
+  <h3>阿里巴巴-W (09988) — <span class="badge badge-yellow">估值地板，等待催化剂</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: HK$106.90 | <strong>市值</strong>: 2.05万亿港元</p>
+      <p><strong>PE 17.1x</strong> · PB 1.7x · 股息率 0.96%</p>
+      <p><strong>52周高</strong>: 185.17 | <strong>52周低</strong>: 100.77</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-5.79, DEA=-4.54, 柱=-2.49（死叉加深）</p>
+      <p><strong>KDJ</strong>: K=8.8, D=11.1, J=4.3（深度超卖）</p>
+      <p><strong>资金</strong>: 主力-4.02亿，南向日减-12.59亿（大幅撤离）</p>
+    </div>
+  </div>
+  <div class="warning-box">
+    <strong>诊断</strong>: PE 17.1x、PB 1.7x已到历史底部区域，但MACD死叉加深+南向资金大幅撤离(-12.59亿日)说明短期情绪极差。阿里云AI叙事尚未转化为利润增长。当前价接近52周低点，技术面全面走弱。<strong>不建议此时割肉</strong>，PE/PB均处低位有安全边际，但也不加仓，等待右侧信号（MACD金叉+南向转正）。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 小米 -->
+  <h3>小米集团-W (01810) — <span class="badge badge-yellow">深度回调，估值消化中</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: HK$25.42 | <strong>市值</strong>: 6569亿港元</p>
+      <p><strong>PE 16.4x</strong> · PB 2.2x</p>
+      <p><strong>52周高</strong>: 61.45 | <strong>52周低</strong>: 25.14</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-1.32, DEA=-1.16, 柱=-0.34（死叉）</p>
+      <p><strong>KDJ</strong>: K=9.9, D=11.8, J=6.0（深度超卖）</p>
+      <p><strong>资金</strong>: 主力+0.19亿，南向日增+2.70亿</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 从61.45高点回调58.5%，已跌至52周低点附近。PE 16.4x在小米历史上偏低，但汽车业务亏损拖累整体利润。南向资金逆势买入（日增2.7亿），显示长线资金在底部收集筹码。KDJ深度超卖意味着反弹随时可能发生。<strong>不建议此时止损</strong>，但反弹至28-30可考虑减仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 小鹏 -->
+  <h3>小鹏汽车-W (09868) — <span class="badge badge-red">持续走弱，需重新评估</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: HK$53.35 | <strong>市值</strong>: 1021亿港元</p>
+      <p><strong>PE 亏损</strong> · PB 3.2x</p>
+      <p><strong>52周高</strong>: 110.80 | <strong>52周低</strong>: 52.65</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-2.59, DEA=-1.45, 柱=-2.28（死叉加深）</p>
+      <p><strong>KDJ</strong>: K=7.6, D=12.2, J=-1.6（严重超卖）</p>
+      <p><strong>资金</strong>: 主力+0.29亿，南向日减-1.94亿</p>
+    </div>
+  </div>
+  <div class="danger-box">
+    <strong>诊断</strong>: 年至今-32.77%，60日-29.48%，在所有市场中表现最差之一。当前价紧贴52周低点，今日再跌3%。公司仍未盈利，在港股当前风险偏好低迷的环境下持续承压。<strong>建议</strong>: 如无法承受继续亏损，考虑减仓换入确定性更强的标的（如腾讯）。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 赣锋锂业H -->
+  <h3>赣锋锂业 (01772) — <span class="badge badge-green">港股唯一亮点，趋势向好</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: HK$60.55 | <strong>市值</strong>: 1270亿港元</p>
+      <p><strong>PE 29.5x</strong> · PB 2.4x · 股息率 0.28%</p>
+      <p><strong>52周高</strong>: 91.03 | <strong>52周低</strong>: 19.66</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-3.53, DEA=-4.28, 柱=+1.49（金叉中）</p>
+      <p><strong>KDJ</strong>: K=68.1, D=56.7, J=91.0（强势区）</p>
+      <p><strong>资金</strong>: 主力+0.19亿，南向日增+0.97亿</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 年至今+16.94%，是港股组合中唯一正收益标的。MACD金叉+KDJ强势，技术面良好。锂价触底预期+新能源需求回暖是核心逻辑。赣锋锂业AH两地都持有（A股sz002460），存在重复配置。<strong>建议</strong>: 继续持有，A/H选一个保留即可，避免同一标的重仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 哔哩哔哩 -->
+  <h3>哔哩哔哩-W (09626) — <span class="badge badge-yellow">底部盘整，等待拐点</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: HK$137.30 | <strong>市值</strong>: 572亿港元</p>
+      <p><strong>PE 35.8x</strong> · PB 3.2x</p>
+      <p><strong>52周高</strong>: 285.60 | <strong>52周低</strong>: 129.60</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-6.21, DEA=-7.17, 柱=+1.92（金叉中）</p>
+      <p><strong>KDJ</strong>: K=25.4, D=33.2, J=9.6（偏弱但反弹中）</p>
+      <p><strong>资金</strong>: 主力+0.42亿，南向日增+1.99亿</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 60日-34.43%回调极深，但MACD金叉+南向资金日增1.99亿显示底部有承接。PE 35.8x在扭亏为盈后有一定支撑。Z世代用户基本盘稳固。<strong>建议持有</strong>，不加仓，等待游戏/广告业务释放利润信号。
+  </div>
+</div>
+
+<!-- ====== 美股诊断 ====== -->
+<div class="card">
+  <h2>三、美股持仓诊断 <span style="font-size:13px;font-weight:400;color:#888;">(USD)</span></h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>代码</th><th>名称</th><th>现价</th><th>今日%</th><th>20日%</th><th>60日%</th><th>年至今%</th>
+        <th>PE</th><th>持仓盈亏</th><th>技术信号</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>NVDA</strong></td><td>英伟达</td>
+        <td>207.41</td><td class="down">-2.37%</td><td class="down">-6.59%</td><td class="up">+20.24%</td><td class="up">+11.36%</td>
+        <td>31.8x</td><td class="up">+$17,193</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+      <tr>
+        <td><strong>SOXL</strong></td><td>半导体3倍做多</td>
+        <td>226.19</td><td class="down">-16.99%</td><td class="up">+49.05%</td><td class="up">+342.3%</td><td class="up">+438.2%</td>
+        <td>—</td><td class="up">+$78,242</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>TSLA</strong></td><td>特斯拉</td>
+        <td>404.66</td><td class="down">-1.58%</td><td class="down">-1.30%</td><td class="up">+9.97%</td><td class="down">-10.02%</td>
+        <td>371x</td><td class="up">+$7,378</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+      <tr>
+        <td><strong>META</strong></td><td>Meta Platforms</td>
+        <td>600.21</td><td class="up">+1.13%</td><td class="down">-1.71%</td><td class="up">+1.19%</td><td class="down">-8.91%</td>
+        <td>21.8x</td><td class="down">-$1,141</td>
+        <td><span class="badge badge-yellow">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>PLTR</strong></td><td>Palantir</td>
+        <td>133.25</td><td class="down">-1.08%</td><td class="down">-1.40%</td><td class="down">-11.57%</td><td class="down">-25.04%</td>
+        <td>150x</td><td class="up">+$17,972</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-yellow">KDJ弱</span></td>
+      </tr>
+      <tr>
+        <td><strong>APP</strong></td><td>Applovin</td>
+        <td>515.20</td><td class="down">-1.09%</td><td class="up">+4.63%</td><td class="up">+16.46%</td><td class="down">-23.54%</td>
+        <td>44.3x</td><td class="down">-$2,526</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+      <tr>
+        <td><strong>PANW</strong></td><td>Palo Alto Networks</td>
+        <td>279.90</td><td class="down">-1.63%</td><td class="up">+13.07%</td><td class="up">+71.77%</td><td class="up">+51.95%</td>
+        <td>243x</td><td class="up">+$3,103</td>
+        <td><span class="badge badge-green">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>SOFI</strong></td><td>SoFi Technologies</td>
+        <td>17.71</td><td class="up">+3.39%</td><td class="up">+12.73%</td><td class="up">+4.79%</td><td class="down">-32.35%</td>
+        <td>39.4x</td><td class="up">+$4,554</td>
+        <td><span class="badge badge-green">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>SHOP</strong></td><td>Shopify</td>
+        <td>113.23</td><td class="up">+0.66%</td><td class="up">+10.59%</td><td class="down">-3.04%</td><td class="down">-29.66%</td>
+        <td>111x</td><td class="up">+$3,174</td>
+        <td><span class="badge badge-yellow">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>HIMS</strong></td><td>Hims & Hers</td>
+        <td>31.47</td><td class="up">+4.31%</td><td class="up">+41.18%</td><td class="up">+42.92%</td><td class="down">-3.08%</td>
+        <td>亏损</td><td class="down">-$3,271</td>
+        <td><span class="badge badge-green">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>MSTR</strong></td><td>MicroStrategy</td>
+        <td>122.81</td><td class="down">-6.35%</td><td class="down">-26.30%</td><td class="down">-9.47%</td><td class="down">-19.18%</td>
+        <td>亏损</td><td class="down">-$3,533</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-yellow">KDJ弱</span></td>
+      </tr>
+      <tr>
+        <td><strong>BABA</strong></td><td>阿里巴巴</td>
+        <td>110.97</td><td class="down">-1.40%</td><td class="down">-16.07%</td><td class="down">-8.56%</td><td class="down">-23.75%</td>
+        <td>17.4x</td><td class="down">-$144</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-red">KDJ弱</span></td>
+      </tr>
+      <tr>
+        <td><strong>CELH</strong></td><td>Celsius Holdings</td>
+        <td>30.01</td><td class="up">+4.42%</td><td class="up">+2.32%</td><td class="down">-27.70%</td><td class="down">-34.39%</td>
+        <td>69.8x</td><td class="down">-$540</td>
+        <td><span class="badge badge-yellow">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><strong>UVXY</strong></td><td>VIX 1.5倍做多</td>
+        <td>25.84</td><td class="up">+0.27%</td><td class="down">-25.73%</td><td class="down">-52.24%</td><td class="down">-28.08%</td>
+        <td>—</td><td class="down">-$3,661</td>
+        <td><span class="badge badge-purple">杠杆ETF</span> <span class="badge badge-red">⚠持续损耗</span></td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><strong>FNGD</strong></td><td>FANG+ 3倍做空</td>
+        <td>35.12</td><td class="up">+6.26%</td><td class="down">-8.28%</td><td class="down">-50.39%</td><td class="down">-33.36%</td>
+        <td>—</td><td class="up">+$59</td>
+        <td><span class="badge badge-purple">杠杆ETF</span> <span class="badge badge-red">⚠反向ETF</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-header">美股核心持仓深度分析</div>
+
+  <!-- NVDA -->
+  <h3>英伟达 (NVDA) — <span class="badge badge-green">AI之王，核心底仓</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: $207.41 | <strong>市值</strong>: 5.02万亿</p>
+      <p><strong>PE 31.8x</strong> · PB 25.7x · 股息率 0.13%</p>
+      <p><strong>52周高</strong>: 236.26 | <strong>52周低</strong>: 141.82</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-1.01, DEA=+0.23, 柱=-2.48（死叉）</p>
+      <p><strong>KDJ</strong>: K=39.0, D=31.0, J=54.9（中性偏弱）</p>
+      <p><strong>持仓盈亏</strong>: <span class="up">+$17,193</span> | 卖空比 1.18%（极低）</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: AI算力绝对核心，PE 31.8x相比增速仍有性价比。60日+20.24%趋势良好，MACD短期死叉但幅度不大。卖空比仅1.18%，市场做空意愿极低。<strong>建议作为美股组合最大底仓坚定持有</strong>，每次回调都是加仓机会。
+  </div>
+
+  <hr class="divider">
+
+  <!-- SOXL -->
+  <h3>SOXL 半导体3倍做多 — <span class="badge badge-yellow">暴利+暴亏双刃剑</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: $226.19 | <strong>今日</strong>: <span class="down">-16.99%</span></p>
+      <p><strong>年至今</strong>: <span class="up">+438.16%</span> | <strong>持仓盈亏</strong>: <span class="up">+$78,242</span></p>
+      <p><strong>成本</strong>: $20.05 | <strong>52周低</strong>: $20.21</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=+19.01, DEA=+21.93, 柱=-5.84（死叉）</p>
+      <p><strong>KDJ</strong>: K=60.0, D=56.8, J=66.3（偏强）</p>
+      <p><strong>成本极低</strong>: 盈利+1019%，已锁定巨大利润</p>
+    </div>
+  </div>
+  <div class="danger-box">
+    <strong>诊断</strong>: 今日暴跌-17%！3倍杠杆ETF的威力充分体现。虽然你成本$20.05，浮盈$78,242（+1019%），但一天蒸发近$18,000。<strong>强烈建议至少减仓一半</strong>，锁定这笔巨大利润。3倍杠杆ETF不适合长期持有，半导体板块稍有风吹草动就会放大3倍跌幅。不要因贪婪让暴利回吐。
+  </div>
+
+  <hr class="divider">
+
+  <!-- PLTR -->
+  <h3>Palantir (PLTR) — <span class="badge badge-yellow">高估值+趋势走弱</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: $133.25 | <strong>市值</strong>: 3194亿</p>
+      <p><strong>PE 150x</strong> · PB 37.8x</p>
+      <p><strong>52周高</strong>: 207.52 | <strong>52周低</strong>: 122.68</p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-2.20, DEA=-1.35, 柱=-1.71（死叉）</p>
+      <p><strong>KDJ</strong>: K=30.2, D=24.8, J=41.1（偏弱）</p>
+      <p><strong>卖空比</strong>: 2.89%（温和） | <strong>持仓盈亏</strong>: <span class="up">+$17,972</span></p>
+    </div>
+  </div>
+  <div class="warning-box">
+    <strong>诊断</strong>: PE 150x估值极端，60日-11.57%、年至今-25.04%趋势走弱。你成本$12.79，浮盈+941%已非常可观。当前MACD死叉+KDJ偏弱，短期无反转信号。<strong>建议</strong>: 减仓锁定利润，保留少量仓位跟踪AI to GTM主线。
+  </div>
+
+  <hr class="divider">
+
+  <!-- MSTR -->
+  <h3>MicroStrategy (MSTR) — <span class="badge badge-red">比特币杠杆赌注，今日暴跌</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: $122.81 | <strong>今日</strong>: <span class="down">-6.35%</span></p>
+      <p><strong>PE 亏损</strong> · PB 1.2x</p>
+      <p><strong>20日</strong>: <span class="down">-26.30%</span> | <strong>年至今</strong>: <span class="down">-19.18%</span></p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=-11.07, DEA=-10.31, 柱=-1.51（死叉）</p>
+      <p><strong>KDJ</strong>: K=39.7, D=31.9, J=55.2（中性偏弱）</p>
+      <p><strong>卖空比</strong>: 10.73%（<span class="down">偏高</span>）| <strong>持仓盈亏</strong>: <span class="down">-$3,533</span></p>
+    </div>
+  </div>
+  <div class="danger-box">
+    <strong>诊断</strong>: 比特币价格波动直接影响MSTR。20日-26.3%暴跌+卖空比10.73%偏高+MACD深度死叉，三重看空信号。你同时在港股持有南方两倍做多MSTR（亏损-87,744港元），MSTR相关风险敞口过大。<strong>强烈建议</strong>: 美股MSTR+港股MSTR杠杆ETF至少清理一个，避免同一标的重仓赌方向。
+  </div>
+
+  <hr class="divider">
+
+  <!-- HIMS -->
+  <h3>Hims & Hers (HIMS) — <span class="badge badge-green">近期强势，反弹进行中</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>现价</strong>: $31.47 | <strong>市值</strong>: 73亿</p>
+      <p><strong>今日</strong>: <span class="up">+4.31%</span> | <strong>20日</strong>: <span class="up">+41.18%</span></p>
+      <p><strong>60日</strong>: <span class="up">+42.92%</span></p>
+    </div>
+    <div>
+      <p><strong>MACD</strong>: DIF=+1.33, DEA=+0.86, 柱=+0.95（金叉）</p>
+      <p><strong>KDJ</strong>: K=82.8, D=75.3, J=98.0（强势超买区）</p>
+      <p><strong>卖空比</strong>: 27.05%（<span class="down">极高</span>）| <strong>持仓盈亏</strong>: <span class="down">-$3,271</span></p>
+    </div>
+  </div>
+  <div class="warning-box">
+    <strong>诊断</strong>: 20日+41%反弹强劲，GLP-1减肥药线上处方叙事驱动。但卖空比27.05%极高（全组合最高），说明大量资金押注下跌。KDJ已进入超买区(J=98)，短期回调风险上升。你成本$38.14，仍浮亏-$3,271。<strong>建议</strong>: 反弹至成本附近可考虑减仓，卖空比27%意味着一旦转势跌幅会很猛。
+  </div>
+
+  <hr class="divider">
+
+  <!-- UVXY / FNGD 杠杆ETF警告 -->
+  <h3>UVXY (VIX 1.5倍做多) + FNGD (FANG+ 3倍做空) — <span class="badge badge-red">资金黑洞</span></h3>
+  <div class="danger-box">
+    <strong>诊断</strong>: 这两只产品属于<strong>不适合长期持有的杠杆/反向ETF</strong>。
+    <ul style="margin:8px 0 0 18px;">
+      <li><strong>UVXY</strong>: 年至今-28.08%, 60日-52.24%。VIX长期向下+杠杆损耗=持续贬值。持仓亏损-$3,661</li>
+      <li><strong>FNGD</strong>: 3倍做空FANG+指数。在科技股长牛背景下，做空科技股无异于螳臂当车。年至今-33.36%</li>
+      <li>这两只产品每日再平衡导致<strong>时间损耗(contango+decay)</strong>，持有越久亏越多</li>
+      <li><strong>强烈建议清仓</strong>，不要用这两只产品做任何形式的"对冲"或"抄底"</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== 跨市场结构分析 ====== -->
+<div class="card">
+  <h2>四、跨市场组合结构分析</h2>
+
+  <h3>4.1 行业/主题配置矩阵</h3>
+  <table>
+    <thead>
+      <tr><th>主题</th><th>A股</th><th>港股</th><th>美股</th><th>集中度评估</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>AI/半导体</strong></td>
+        <td>寒武纪、中芯、胜宏</td><td>—</td><td>NVDA、SOXL</td>
+        <td><span class="badge badge-yellow">偏高</span> 5只，跨两市</td>
+      </tr>
+      <tr>
+        <td><strong>互联网/科技</strong></td>
+        <td>—</td><td>腾讯、阿里、小米、B站</td><td>META、PLTR、APP、SHOP</td>
+        <td><span class="badge badge-red">过高</span> 8只</td>
+      </tr>
+      <tr>
+        <td><strong>新能源/汽车</strong></td>
+        <td>宁德、比亚迪、赣锋A</td><td>小鹏、赣锋H</td><td>TSLA</td>
+        <td><span class="badge badge-yellow">偏高</span> 6只，跨三市</td>
+      </tr>
+      <tr>
+        <td><strong>金融科技</strong></td>
+        <td>—</td><td>—</td><td>SOFI</td>
+        <td><span class="badge badge-green">低</span></td>
+      </tr>
+      <tr>
+        <td><strong>网络安全</strong></td>
+        <td>—</td><td>—</td><td>PANW</td>
+        <td><span class="badge badge-green">低</span></td>
+      </tr>
+      <tr>
+        <td><strong>消费/健康</strong></td>
+        <td>—</td><td>—</td><td>CELH、HIMS</td>
+        <td><span class="badge badge-green">低</span></td>
+      </tr>
+      <tr>
+        <td><strong>比特币/加密</strong></td>
+        <td>—</td><td>南方MSTR ETF</td><td>MSTR</td>
+        <td><span class="badge badge-yellow">需关注</span> 跨市2只</td>
+      </tr>
+      <tr style="background:#fff5f5;">
+        <td><strong>杠杆/反向ETF</strong></td>
+        <td>—</td><td>4只南方两倍做多</td><td>SOXL、UVXY、FNGD</td>
+        <td><span class="badge badge-red">危险</span> 7只！</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="danger-box" style="margin-top:16px;">
+    <strong>组合结构性风险</strong>:
+    <ol style="margin:8px 0 0 20px;">
+      <li><strong>互联网/科技主题超配</strong>: 腾讯+阿里+小米+B站+META+PLTR+APP+SHOP共8只，占组合数量23%。如果互联网板块系统性回调（如当前港股互联网的弱势），将承受较大回撤</li>
+      <li><strong>杠杆ETF泛滥</strong>: 7只杠杆产品占总持仓20%，这在新手投资者中极为罕见。杠杆ETF的每日再平衡机制意味着即使标的涨回来，你也可能亏钱（波动率损耗）</li>
+      <li><strong>跨市重复持仓</strong>: 阿里(A股无但港股+美股双持)、赣锋锂业(A+H)、MSTR(美股+港股杠杆ETF)，同一标的多市持有放大了单一公司风险</li>
+      <li><strong>防御性配置为零</strong>: 全组合无消费必需品、公用事业、医疗保健等防御板块，100%进攻型配置</li>
+    </ol>
+  </div>
+
+  <h3 style="margin-top:22px;">4.2 三市场盈亏面统计</h3>
+  <table>
+    <thead>
+      <tr><th>市场</th><th>盈利标的</th><th>亏损标的</th><th>最大盈利</th><th>最大亏损</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>A股</strong></td>
+        <td>7只</td><td>2只</td>
+        <td>龙磁科技+195.5%</td><td>比亚迪-10.5%</td>
+      </tr>
+      <tr>
+        <td><strong>港股</strong></td>
+        <td>4只</td><td>7只</td>
+        <td>赣锋锂业H +16.94%</td>
+        <td>小米-35.32%</td>
+      </tr>
+      <tr>
+        <td><strong>美股</strong></td>
+        <td>9只</td><td>6只</td>
+        <td>SOXL +438.16%</td>
+        <td>UVXY -28.08%</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="warning-box">
+    <strong>关键发现</strong>: 港股是唯一整体亏损的市场（7亏4盈），主要受互联网板块系统性下跌拖累。美股表现最好（9盈6亏），但杠杆ETF贡献了极端收益（SOXL +438% vs UVXY -28%）。
+  </div>
+</div>
+
+<!-- ====== 综合调整建议 ====== -->
+<div class="card">
+  <h2>五、综合调仓建议（按优先级排序）</h2>
+
+  <table>
+    <thead>
+      <tr><th>优先级</th><th>标的</th><th>市场</th><th>操作</th><th>理由</th></tr>
+    </thead>
+    <tbody>
+      <!-- P0 -->
+      <tr style="background:#fff5f5;">
+        <td><span class="badge badge-red">P0 紧急</span></td>
+        <td><strong>UVXY + FNGD</strong></td>
+        <td>美股</td>
+        <td><span class="badge badge-red">清仓</span></td>
+        <td>杠杆/反向ETF不适合长期持有，持续损耗本金</td>
+      </tr>
+      <tr style="background:#fff5f5;">
+        <td><span class="badge badge-red">P0 紧急</span></td>
+        <td><strong>SOXL</strong></td>
+        <td>美股</td>
+        <td><span class="badge badge-red">减仓50%+</span></td>
+        <td>今日-17%，浮盈+$78,242必须锁定。3倍杠杆不宜长持</td>
+      </tr>
+      <tr style="background:#fff5f5;">
+        <td><span class="badge badge-red">P0 紧急</span></td>
+        <td><strong>南方两倍做多MSTR</strong></td>
+        <td>港股</td>
+        <td><span class="badge badge-red">止损</span></td>
+        <td>浮亏-87,744港元+现价仅4.192，MSTR美股今日-6.35%</td>
+      </tr>
+      <!-- P1 -->
+      <tr style="background:#fffbf0;">
+        <td><span class="badge badge-yellow">P1 重要</span></td>
+        <td><strong>MSTR (美股)</strong></td>
+        <td>美股</td>
+        <td><span class="badge badge-yellow">减仓或清仓</span></td>
+        <td>与港股MSTR杠杆ETF重复，20日-26.3%趋势走坏</td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><span class="badge badge-yellow">P1 重要</span></td>
+        <td><strong>比亚迪</strong></td>
+        <td>A股</td>
+        <td><span class="badge badge-yellow">大幅减仓</span></td>
+        <td>60日-14.5%，主力20日流出44亿，汽车板块最弱</td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><span class="badge badge-yellow">P1 重要</span></td>
+        <td><strong>中国稀土</strong></td>
+        <td>A股</td>
+        <td><span class="badge badge-yellow">清仓换仓</span></td>
+        <td>PE 263x无基本面支撑，主力持续流出</td>
+      </tr>
+      <tr style="background:#fffbf0;">
+        <td><span class="badge badge-yellow">P1 重要</span></td>
+        <td><strong>龙磁科技</strong></td>
+        <td>A股</td>
+        <td><span class="badge badge-yellow">减仓50%+</span></td>
+        <td>年+195%后MACD死叉，获利盘涌出</td>
+      </tr>
+      <!-- P2 -->
+      <tr>
+        <td><span class="badge badge-blue">P2 建议</span></td>
+        <td><strong>PLTR</strong></td>
+        <td>美股</td>
+        <td><span class="badge badge-blue">减仓锁利</span></td>
+        <td>PE 150x+60日-11.57%，浮盈+$17,972</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">P2 建议</span></td>
+        <td><strong>小鹏汽车</strong></td>
+        <td>港股</td>
+        <td><span class="badge badge-blue">减仓/换腾讯</span></td>
+        <td>年-32.77%持续新低，换确定性更强的腾讯</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">P2 建议</span></td>
+        <td><strong>赣锋锂业A/H</strong></td>
+        <td>A+H</td>
+        <td><span class="badge badge-blue">合并为一个</span></td>
+        <td>AH重复持仓，保留一个即可</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">P2 建议</span></td>
+        <td><strong>南方两倍做多系列</strong></td>
+        <td>港股</td>
+        <td><span class="badge badge-blue">控制总仓位&lt;5%</span></td>
+        <td>4只杠杆ETF合计占比过高，至少清理2只</td>
+      </tr>
+      <!-- HOLD -->
+      <tr style="background:#f0fff4;">
+        <td><span class="badge badge-green">持有</span></td>
+        <td><strong>NVDA / 腾讯 / 中芯 / 胜宏 / PANW</strong></td>
+        <td>三市</td>
+        <td><span class="badge badge-green">坚定持有</span></td>
+        <td>核心优质资产，趋势和基本面俱佳</td>
+      </tr>
+      <tr style="background:#f0fff4;">
+        <td><span class="badge badge-green">持有</span></td>
+        <td><strong>宁德时代 / META / SOFI / 日经ETF</strong></td>
+        <td>三市</td>
+        <td><span class="badge badge-green">持有观察</span></td>
+        <td>基本面扎实或趋势向好，暂不动</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ====== 风险矩阵 ====== -->
+<div class="card">
+  <h2>六、组合风险矩阵</h2>
+
+  <div class="grid-2">
+    <div>
+      <h3>风险维度评分</h3>
+      <table>
+        <tr><td>集中度风险</td><td><span class="badge badge-red">高</span></td><td>AI+互联网占比过重</td></tr>
+        <tr><td>杠杆风险</td><td><span class="badge badge-red">极高</span></td><td>7只杠杆ETF，占比20%</td></tr>
+        <tr><td>估值风险</td><td><span class="badge badge-yellow">中高</span></td><td>多只PE>100x</td></tr>
+        <tr><td>汇率风险</td><td><span class="badge badge-yellow">中等</span></td><td>三市场三种货币敞口</td></tr>
+        <tr><td>流动性风险</td><td><span class="badge badge-green">低</span></td><td>大部分为大盘股</td></tr>
+        <tr><td>重复持仓风险</td><td><span class="badge badge-yellow">中等</span></td><td>阿里/赣锋/MSTR跨市重复</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>释放资金后建议配置方向</h3>
+      <div class="summary-box">
+        <strong>从杠杆ETF和高风险标的释放资金后，建议增配:</strong>
+        <ol style="margin:8px 0 0 20px;">
+          <li><strong>美股防御型ETF</strong>: 如SPY/VOO（标普500），降低组合波动</li>
+          <li><strong>医疗保健</strong>: 如UNH/LLY，增加防御性配置</li>
+          <li><strong>A股通信/光模块</strong>: AI算力确定性延伸方向</li>
+          <li><strong>港股高股息</strong>: 如中移动/中海油，获取稳定现金流</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="danger-box" style="margin-top:18px;">
+    <strong>最核心的建议</strong>: 你的组合中<strong>杠杆ETF太多了</strong>。7只杠杆产品意味着组合弹性极大，但回撤也同样剧烈。SOXL今日-17%就是最好的警示。建议将杠杆ETF总数控制在<strong>2只以内</strong>，总仓位不超过<strong>10%</strong>。投资是长跑，不是短跑。
+  </div>
+</div>
+
+<!-- ====== 声明 ====== -->
+<div class="card">
+  <p style="font-size:13px; color:#888; text-align:center;">
+    数据来源: westock-data (腾讯自选股行情接口) | 生成时间: 2026-06-17 17:30 CST
+    <br>港股数据货币单位为港元(HK$)，美股为美元(USD)，A股为人民币(CNY)
+    <br>港股南方两倍做多系列ETF因数据源限制，部分技术指标缺失
+    <br><br>⚠ <strong>重要声明</strong>: 以上分析仅供参考，不构成投资建议。投资有风险，决策需谨慎。
+    <br>杠杆ETF存在每日再平衡损耗，历史表现不代表未来收益。请咨询持牌投资顾问。
+  </p>
+</div>
+
+</div>
+</body>
+</html>

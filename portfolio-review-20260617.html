@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>持仓诊断报告 | 2026-06-17</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, 'Microsoft YaHei', sans-serif; background:#f5f7fa; color:#1a1a2e; line-height:1.6; }
+  .container { max-width:1100px; margin:0 auto; padding:24px; }
+  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color:#fff; padding:32px 36px; border-radius:14px; margin-bottom:28px; }
+  .header h1 { font-size:26px; font-weight:700; margin-bottom:6px; }
+  .header .sub { font-size:14px; opacity:0.75; }
+  .card { background:#fff; border-radius:12px; padding:28px; margin-bottom:22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .card h2 { font-size:19px; font-weight:700; margin-bottom:18px; color:#16213e; border-bottom:2px solid #eef2f7; padding-bottom:10px; }
+  .card h3 { font-size:15px; font-weight:600; margin:16px 0 10px; color:#333; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin:10px 0 16px; }
+  th { background:#f0f4ff; text-align:left; padding:9px 10px; font-weight:600; color:#444; border-bottom:2px solid #dde4f0; white-space:nowrap; }
+  td { padding:9px 10px; border-bottom:1px solid #eef2f7; }
+  tr:hover td { background:#fafbff; }
+  .up { color:#e53e3e; font-weight:600; }
+  .down { color:#38a169; font-weight:600; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+  .badge-green { background:#e6ffed; color:#22543d; }
+  .badge-yellow { background:#fffbea; color:#975a16; }
+  .badge-red { background:#ffeef0; color:#9b2c2c; }
+  .badge-blue { background:#ebf4ff; color:#2a4365; }
+  .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+  @media(max-width:768px) { .grid-2 { grid-template-columns:1fr; } }
+  .meter-bar { height:6px; border-radius:3px; background:#eef2f7; margin-top:3px; }
+  .meter-fill { height:6px; border-radius:3px; }
+  .summary-box { background:#f8faff; border-left:4px solid #3b82f6; padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; font-size:14px; }
+  .warning-box { background:#fffbf0; border-left:4px solid #f59e0b; padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; font-size:14px; }
+  .danger-box { background:#fff5f5; border-left:4px solid #e53e3e; padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; font-size:14px; }
+  .info-row { display:flex; gap:16px; flex-wrap:wrap; margin:8px 0; }
+  .info-item { background:#f0f4ff; padding:8px 14px; border-radius:8px; font-size:13px; }
+  .info-item strong { color:#1a1a2e; }
+  .divider { border:none; border-top:1px dashed #dde4f0; margin:18px 0; }
+  .action-btn { display:inline-block; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none; margin:2px 4px; }
+  .btn-buy { background:#e6ffed; color:#22543d; border:1px solid #c6f6d5; }
+  .btn-hold { background:#ebf4ff; color:#2a4365; border:1px solid #bee3f8; }
+  .btn-reduce { background:#fffbea; color:#975a16; border:1px solid #fefcbf; }
+  .btn-sell { background:#ffeef0; color:#9b2c2c; border:1px solid #fed7d7; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>A股持仓诊断报告</h1>
+  <div class="sub">数据截至 2026-06-17 收盘 | 基于 westock-data 实时行情、资金流向、财务与技术指标</div>
+</div>
+
+<!-- ====== 持仓全景 ====== -->
+<div class="card">
+  <h2>一、持仓全景一览</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>代码</th><th>名称</th><th>今日%</th><th>5日%</th><th>60日%</th><th>年至今%</th>
+        <th>PE(TTM)</th><th>PB</th><th>主力净流入</th><th>技术信号</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>sh688256</strong></td><td>寒武纪</td>
+        <td class="up">+1.0%</td><td class="up">+7.2%</td><td class="up">+89.9%</td><td class="up">+45.3%</td>
+        <td>305x</td><td>67.8x</td><td class="up">+1.1亿</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>sh688981</strong></td><td>中芯国际</td>
+        <td class="up">+3.5%</td><td class="up">+7.5%</td><td class="up">+27.1%</td><td class="up">+9.7%</td>
+        <td>214x</td><td>7.2x</td><td class="up">+6.6亿</td>
+        <td><span class="badge badge-green">MACD金叉中</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>sz000831</strong></td><td>中国稀土</td>
+        <td class="down">-3.1%</td><td class="up">+9.3%</td><td class="up">+23.4%</td><td class="up">+27.2%</td>
+        <td>263x</td><td>12.7x</td><td class="down">-3.2亿</td>
+        <td><span class="badge badge-yellow">MACD柱收窄</span> <span class="badge badge-yellow">KDJ拐头</span></td>
+      </tr>
+      <tr>
+        <td><strong>sz002460</strong></td><td>赣锋锂业</td>
+        <td class="down">-0.2%</td><td class="up">+5.5%</td><td class="up">+12.4%</td><td class="up">+13.4%</td>
+        <td>39x</td><td>3.2x</td><td class="down">-2.2亿</td>
+        <td><span class="badge badge-green">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>sz300750</strong></td><td>宁德时代</td>
+        <td class="down">-1.1%</td><td class="up">+2.7%</td><td class="up">+1.4%</td><td class="up">+10.7%</td>
+        <td>23x</td><td>5.7x</td><td class="down">-6.0亿</td>
+        <td><span class="badge badge-yellow">MACD死叉</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+      <tr>
+        <td><strong>sz002594</strong></td><td>比亚迪</td>
+        <td class="down">-2.4%</td><td class="down">-3.1%</td><td class="down">-14.5%</td><td class="down">-10.5%</td>
+        <td>29x</td><td>3.4x</td><td class="down">-10亿</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-red">KDJ死叉</span></td>
+      </tr>
+      <tr>
+        <td><strong>sz300476</strong></td><td>胜宏科技</td>
+        <td class="up">+1.8%</td><td class="up">+9.5%</td><td class="up">+31.4%</td><td class="up">+26.7%</td>
+        <td>76x</td><td>22.7x</td><td class="up">+0.7亿</td>
+        <td><span class="badge badge-green">MACD金叉</span> <span class="badge badge-green">KDJ强</span></td>
+      </tr>
+      <tr>
+        <td><strong>sh513520</strong></td><td>日经ETF</td>
+        <td class="up">+0.1%</td><td class="up">+9.3%</td><td class="up">+29.7%</td><td class="up">+37.1%</td>
+        <td>—</td><td>—</td><td>—</td>
+        <td><span class="badge badge-green">全多头排列</span></td>
+      </tr>
+      <tr>
+        <td><strong>sz300835</strong></td><td>龙磁科技</td>
+        <td class="down">-3.9%</td><td class="down">-1.3%</td><td class="up">+157.9%</td><td class="up">+195.5%</td>
+        <td>137x</td><td>18.5x</td><td class="down">-1.0亿</td>
+        <td><span class="badge badge-red">MACD死叉</span> <span class="badge badge-yellow">KDJ中性</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ====== 逐股诊断 ====== -->
+<div class="card">
+  <h2>二、逐股深度诊断</h2>
+
+  <!-- 寒武纪 -->
+  <h3>1. 寒武纪 (sh688256) — <span class="badge badge-yellow">高位持有，警惕回调</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 1320元 | <strong>总市值</strong>: 8293亿</p>
+      <p><strong>PE 305x</strong> · PB 67.8x · PS 99x · PCF 473x</p>
+      <p><strong>52周高</strong>: 1448 | <strong>52周低</strong>: 348</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 4.93元（营收65亿，净利20.6亿）</p>
+      <p><strong>技术</strong>: MACD柱-23（死叉中），但KDJ K=56仍偏强</p>
+      <p><strong>资金</strong>: 今日主力+1.1亿，大单-7.6亿（游资撤）</p>
+    </div>
+  </div>
+  <div class="warning-box">
+    <strong>诊断</strong>: AI算力龙头，60日+90%涨幅惊人。PE 305x意味着估值高度依赖未来增长叙事。MACD死叉+大单资金大幅流出，短期有调整压力。<strong>Q4利润仅4.5亿（vs Q3 5.7亿）增速放缓</strong>。建议<strong>分批止盈部分仓位</strong>，保留底仓跟踪AI算力主线。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 中芯国际 -->
+  <h3>2. 中芯国际 (sh688981) — <span class="badge badge-green">核心持仓，趋势良好</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 134.7元 | <strong>总市值</strong>: 10794亿</p>
+      <p><strong>PE 214x</strong> · PB 7.2x · PS 15.2x</p>
+      <p><strong>52周高</strong>: 159 | <strong>52周低</strong>: 80.9</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 0.63元（营收673亿，净利50.4亿）</p>
+      <p><strong>技术</strong>: MACD金叉（DIF>DEA），KDJ K=74偏强</p>
+      <p><strong>资金</strong>: 今日主力+6.6亿，全市场排名18</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 半导体制造龙头，今日+3.5%领涨板块。MACD金叉+KDJ强势+主力大幅流入，趋势完好。PE虽高达214x但作为晶圆代工核心标的享有国产替代溢价。当前处于上升通道中轨，<strong>建议继续持有</strong>，回踩130附近可加仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 中国稀土 -->
+  <h3>3. 中国稀土 (sz000831) — <span class="badge badge-yellow">短线脉冲，基本面弱</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 59.09元 | <strong>总市值</strong>: 627亿</p>
+      <p><strong>PE 263x</strong> · PB 12.7x · PS 19.8x</p>
+      <p><strong>52周高</strong>: 66 | <strong>52周低</strong>: 33.9</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 仅0.16元（营收32亿，净利1.7亿）</p>
+      <p><strong>技术</strong>: MACD柱收窄，KDJ K=73接近超买区</p>
+      <p><strong>资金</strong>: 今日主力-3.2亿，大单-2.8亿大幅流出</p>
+    </div>
+  </div>
+  <div class="danger-box">
+    <strong>诊断</strong>: 5日+9.3%跟涨有色金属板块，但基本面极弱——全年净利仅1.7亿支撑627亿市值（PE 263x），Q4净利-1960万亏损。主力资金大幅出逃，属于<strong>纯概念炒作型标的</strong>。建议<strong>择机清仓</strong>，换入基本面更扎实的稀土上游（如北方稀土）。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 赣锋锂业 -->
+  <h3>4. 赣锋锂业 (sz002460) — <span class="badge badge-blue">底部修复中，可持有</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 71.32元 | <strong>总市值</strong>: 1495亿</p>
+      <p><strong>PE 39x</strong> · PB 3.2x · PS 5.3x</p>
+      <p><strong>52周高</strong>: 91.67 | <strong>52周低</strong>: 30.13</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 0.80元（营收231亿，净利16.1亿）</p>
+      <p><strong>技术</strong>: MACD金叉，KDJ K=79接近超买</p>
+      <p><strong>资金</strong>: 今日主力-2.2亿，但5日累计+9.1亿</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 锂盐龙头，全年扭亏为盈（2024亏损→2025净利16亿），基本面改善明确。当前价格位于60日均线下方（77.5），短期有修复空间。但碳酸锂价格仍有下行压力，弹性有限。<strong>建议持有</strong>，作为新能源上游底仓配置，不加仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 宁德时代 -->
+  <h3>5. 宁德时代 (sz300750) — <span class="badge badge-yellow">压舱石，等待突破</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 399元 | <strong>总市值</strong>: 18460亿</p>
+      <p><strong>PE 23x</strong> · PB 5.7x · PS 4.0x</p>
+      <p><strong>52周高</strong>: 468.75 | <strong>52周低</strong>: 230.12</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 16.14元（营收4237亿，净利722亿）</p>
+      <p><strong>技术</strong>: MACD死叉（DIF=-6.3），KDJ K=49偏弱</p>
+      <p><strong>资金</strong>: 今日主力-6.0亿，5日累计+4.3亿（分歧大）</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 动力电池绝对龙头，PE 23x在成长股中合理偏低，2025年净利722亿（+33% YoY）业绩扎实。但60日仅+1.4%，明显跑输大盘（创业板+30%），处于横盘整理。MACD死叉压制短期走势。建议<strong>作为底仓长期持有</strong>，等待锂电板块轮动，若跌破390减仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 比亚迪 -->
+  <h3>6. 比亚迪 (sz002594) — <span class="badge badge-red">趋势走坏，需减仓</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 87.47元 | <strong>总市值</strong>: 7975亿</p>
+      <p><strong>PE 29x</strong> · PB 3.4x · PS 1.0x</p>
+      <p><strong>52周高</strong>: 116.59 | <strong>52周低</strong>: 85.88</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 3.58元（营收8040亿，净利326亿）</p>
+      <p><strong>技术</strong>: MACD死叉，KDJ K=13（严重超卖），J=6.6</p>
+      <p><strong>资金</strong>: 今日主力-10亿，近20日累计-44亿</p>
+    </div>
+  </div>
+  <div class="danger-box">
+    <strong>诊断</strong>: 汽车板块今日-2.27%领跌，比亚迪连续破位。当前价已跌至250日均线（101元）下方13%，20日-6.3%、60日-14.5%全面走弱。主力20日累计流出44亿，机构减仓明显。<strong>虽然PE仅29x不贵，但趋势为王</strong>。建议<strong>大幅减仓至观察仓位</strong>，等待放量站稳90以上再考虑回补。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 胜宏科技 -->
+  <h3>7. 胜宏科技 (sz300476) — <span class="badge badge-green">强势PCB龙头，继续持有</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 361.7元 | <strong>总市值</strong>: 3555亿</p>
+      <p><strong>PE 76x</strong> · PB 22.7x · PS 17.0x</p>
+      <p><strong>52周高</strong>: 402.6 | <strong>52周低</strong>: 107.67</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 5.01元（营收1929亿，净利43.1亿）</p>
+      <p><strong>技术</strong>: MACD金叉（DIF>DEA），KDJ K=72强</p>
+      <p><strong>资金</strong>: 今日主力+0.7亿，5日累计+4.4亿</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: PCB/HDI板龙头，深度受益AI算力硬件需求。60日+31.4%，年内+26.7%，趋势强劲。MACD金叉+主力持续流入，筹码结构良好。PE 76x有业绩增长支撑（净利同比+131%）。<strong>建议继续持有</strong>，短期目标前高402，回踩340可加仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 日经ETF -->
+  <h3>8. 日经ETF华夏 (sh513520) — <span class="badge badge-green">海外配置，趋势极强</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 2.459元 | <strong>总规模</strong>: 25.85亿</p>
+      <p><strong>52周高</strong>: 2.499 | <strong>52周低</strong>: 1.447</p>
+      <p><strong>换手率</strong>: 19.94%</p>
+    </div>
+    <div>
+      <p><strong>年至今</strong>: +37.1% | <strong>250日</strong>: 新高附近</p>
+      <p><strong>技术</strong>: 全均线多头排列，MACD金叉，KDJ K=81</p>
+      <p><strong>均线</strong>: 价格远高于MA5/10/20/60/120/250</p>
+    </div>
+  </div>
+  <div class="summary-box">
+    <strong>诊断</strong>: 日经ETF作为海外资产配置，年至今+37%表现优异。全均线多头排列+MACD金叉+KDJ强，趋势极强。当前接近52周新高，短期可能有震荡。<strong>建议作为海外配置继续持有</strong>，不追高但也不急于减仓。
+  </div>
+
+  <hr class="divider">
+
+  <!-- 龙磁科技 -->
+  <h3>9. 龙磁科技 (sz300835) — <span class="badge badge-yellow">暴涨股，强烈建议减仓</span></h3>
+  <div class="grid-2">
+    <div>
+      <p><strong>当前价</strong>: 193.2元 | <strong>总市值</strong>: 230亿</p>
+      <p><strong>PE 137x</strong> · PB 18.5x · PS 17.5x</p>
+      <p><strong>52周高</strong>: 218 | <strong>52周低</strong>: 38.35</p>
+    </div>
+    <div>
+      <p><strong>2025全年EPS</strong>: 1.44元（营收12.9亿，净利1.68亿）</p>
+      <p><strong>技术</strong>: MACD死叉（DIF=17.7, DEA=20.0），柱-4.7</p>
+      <p><strong>资金</strong>: 今日主力-1.0亿，大单-0.66亿</p>
+    </div>
+  </div>
+  <div class="danger-box">
+    <strong>诊断</strong>: 年至今+195.5%，60日+157.9%，是今年A股最大涨幅股之一。但基本面极弱——全年净利仅1.68亿支撑230亿市值。MACD死叉+主力流出+今日-3.9%放量下跌，获利盘涌出迹象明显。20日+64%说明筹码成本极度分散。<strong>强烈建议至少减仓一半</strong>，锁定利润，剩余仓位设止损线175元。
+  </div>
+</div>
+
+<!-- ====== 组合结构分析 ====== -->
+<div class="card">
+  <h2>三、组合结构分析</h2>
+
+  <h3>行业配置分布</h3>
+  <table>
+    <thead>
+      <tr><th>板块</th><th>持仓</th><th>风格</th><th>当前板块趋势</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>半导体/AI算力</td><td>寒武纪、中芯国际、胜宏科技</td><td>进攻型</td><td>电子板块5日+5.9%，60日+44.5%，主线强势</td></tr>
+      <tr><td>新能源上游</td><td>赣锋锂业、中国稀土、龙磁科技</td><td>周期/概念</td><td>有色5日+9.2%脉冲，但60日+0.1%无趋势</td></tr>
+      <tr><td>新能源整车/电池</td><td>宁德时代、比亚迪</td><td>价值成长</td><td>电力设备60日-1.7%，汽车板块60日-9.4%走弱</td></tr>
+      <tr><td>海外配置</td><td>日经ETF</td><td>对冲/配置</td><td>独立走势，与A股低相关</td></tr>
+    </tbody>
+  </table>
+
+  <div class="summary-box" style="margin-top:18px;">
+    <strong>结构评价</strong>: 
+    <ul style="margin:8px 0 0 18px;">
+      <li><strong>优点</strong>: 半导体主线（寒武纪+中芯+胜宏）占比较高，踩中了今年最强方向；日经ETF提供海外对冲</li>
+      <li><strong>问题1</strong>: 新能源整车（比亚迪）逆势持仓，汽车板块60日-9.4%是当前最弱方向之一</li>
+      <li><strong>问题2</strong>: 稀土+龙磁属于高位纯概念炒作，基本面无法支撑当前估值</li>
+      <li><strong>问题3</strong>: 缺少电力设备（新能源中游）、通信（光模块）等当前强势板块的配置</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== 调整建议 ====== -->
+<div class="card">
+  <h2>四、具体调整建议</h2>
+
+  <table>
+    <thead>
+      <tr><th>标的</th><th>当前建议</th><th>操作方向</th><th>理由</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>寒武纪</strong></td>
+        <td><span class="badge badge-yellow">减仓1/3</span></td>
+        <td>减 → 留底仓</td>
+        <td>PE 305x估值极端，MACD死叉，锁定部分利润</td>
+      </tr>
+      <tr>
+        <td><strong>中芯国际</strong></td>
+        <td><span class="badge badge-green">持有/回调加仓</span></td>
+        <td>维持</td>
+        <td>半导体制造核心，趋势+资金均强</td>
+      </tr>
+      <tr>
+        <td><strong>胜宏科技</strong></td>
+        <td><span class="badge badge-green">持有</span></td>
+        <td>维持</td>
+        <td>PCB龙头，AI算力受益，MACD金叉</td>
+      </tr>
+      <tr>
+        <td><strong>中国稀土</strong></td>
+        <td><span class="badge badge-red">清仓</span></td>
+        <td>清 → 换仓</td>
+        <td>PE 263x+Q4亏损+主力流出，纯概念无基本面</td>
+      </tr>
+      <tr>
+        <td><strong>赣锋锂业</strong></td>
+        <td><span class="badge badge-blue">持有不加仓</span></td>
+        <td>维持</td>
+        <td>底部修复中，PE 39x合理，作底仓配置</td>
+      </tr>
+      <tr>
+        <td><strong>宁德时代</strong></td>
+        <td><span class="badge badge-blue">持有，设止损390</span></td>
+        <td>维持</td>
+        <td>业绩扎实，PE 23x合理，但短期无催化</td>
+      </tr>
+      <tr>
+        <td><strong>比亚迪</strong></td>
+        <td><span class="badge badge-red">大幅减仓</span></td>
+        <td>减至观察仓</td>
+        <td>60日-14.5%，20日主力流出44亿，趋势走坏</td>
+      </tr>
+      <tr>
+        <td><strong>日经ETF</strong></td>
+        <td><span class="badge badge-green">持有</span></td>
+        <td>维持</td>
+        <td>全多头排列，海外配置价值高</td>
+      </tr>
+      <tr>
+        <td><strong>龙磁科技</strong></td>
+        <td><span class="badge badge-red">减仓一半以上</span></td>
+        <td>减 → 锁利</td>
+        <td>年+195%后MACD死叉+放量跌，获利盘涌出</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:22px;">释放资金后的配置方向建议</h3>
+  <div class="summary-box">
+    <strong>从稀土、龙磁、比亚迪释放的资金，建议优先配置：</strong>
+    <ol style="margin:8px 0 0 20px;">
+      <li><strong>通信/光模块</strong>（如亨通光电 600487）：通信板块250日+213%，AI算力刚需，当前主线延伸</li>
+      <li><strong>半导体设备/材料</strong>（如北方华创 002371）：设备端确定性更强，PE相对合理</li>
+      <li><strong>电力设备中游</strong>（如特变电工 600089）：电力设备板块底部企稳，估值合理</li>
+      <li><strong>增配日经ETF或纳指ETF</strong>：提升海外配置比例，降低A股单一市场风险</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ====== 风险提示 ====== -->
+<div class="card">
+  <h2>五、总体风险提示</h2>
+  <div class="danger-box">
+    <strong>当前组合的核心风险</strong>:
+    <ol style="margin:8px 0 0 20px;">
+      <li><strong>集中度风险</strong>: 半导体/AI方向占比过高（寒武纪+中芯+胜宏），若板块回调将承受较大回撤</li>
+      <li><strong>高估值风险</strong>: 9只A股中6只PE>70x，组合整体估值偏高，对利率和流动性敏感</li>
+      <li><strong>比亚迪逆势持仓</strong>: 汽车板块是当前最弱方向之一，继续持有消耗机会成本</li>
+      <li><strong>龙磁暴涨回调风险</strong>: 年+195%后任何风吹草动都可能引发踩踏</li>
+      <li><strong>今日市场极度分化</strong>: 上涨仅31%/下跌68%，非普涨行情，选股容错率低</li>
+    </ol>
+  </div>
+  <p style="margin-top:14px; font-size:13px; color:#888;">
+    数据来源: westock-data (腾讯自选股) | 生成时间: 2026-06-17 17:16
+    <br>⚠ 以上分析仅供参考，不构成投资建议。投资有风险，决策需谨慎。
+  </p>
+</div>
+
+</div>
+</body>
+</html>
