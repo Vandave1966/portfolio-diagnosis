@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026美股四大主线 · A股港股板块对标对比</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.Chart||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>')</script>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-hover: #1c2333;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --text3: #6e7681;
+  --green: #3fb950;
+  --red: #f85149;
+  --purple: #a855f7;
+  --blue: #58a6ff;
+  --orange: #d29922;
+  --cyan: #39d2c0;
+  --pink: #db61a2;
+  --accent1: #a855f7;
+  --accent2: #3b82f6;
+  --accent3: #f97316;
+  --accent4: #22c55e;
+  --cn-red: #ef4444;
+  --hk-blue: #3b82f6;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",Roboto,sans-serif; line-height:1.6; min-height:100vh; }
+.container { max-width:1500px; margin:0 auto; padding:24px 20px; }
+
+.page-header { text-align:center; margin-bottom:36px; }
+.page-header h1 { font-size:2rem; font-weight:800; background:linear-gradient(135deg, var(--cn-red), var(--hk-blue), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px; }
+.page-header p { color:var(--text2); font-size:0.95rem; max-width:800px; margin:0 auto; }
+.date-badge { display:inline-flex; align-items:center; gap:6px; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:6px 16px; font-size:0.85rem; color:var(--text2); margin-bottom:16px; }
+.nav-links { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:28px; }
+.nav-links a { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border-radius:20px; font-size:0.85rem; text-decoration:none; background:var(--bg-card); border:1px solid var(--border); color:var(--text2); transition:all 0.2s; }
+.nav-links a:hover, .nav-links a.active { border-color:var(--accent1); color:var(--accent1); }
+
+/* Narrative Box */
+.narrative { background:linear-gradient(135deg, rgba(168,85,247,0.08), rgba(59,130,246,0.08)); border:1px solid rgba(168,85,247,0.2); border-radius:14px; padding:20px 24px; margin-bottom:32px; }
+.narrative h3 { font-size:1.05rem; font-weight:700; color:var(--accent1); margin-bottom:8px; }
+.narrative p { color:var(--text2); font-size:0.9rem; line-height:1.7; }
+
+/* Sector Overview */
+.sector-overview { display:grid; grid-template-columns:repeat(auto-fit, minmax(330px, 1fr)); gap:16px; margin-bottom:36px; }
+.sector-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+.sector-card:hover { border-color:var(--accent1); transform:translateY(-2px); }
+.sector-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.sector-card.s1::before { background:linear-gradient(90deg, var(--accent1), var(--blue)); }
+.sector-card.s2::before { background:linear-gradient(90deg, var(--accent2), var(--cyan)); }
+.sector-card.s3::before { background:linear-gradient(90deg, var(--accent3), var(--orange)); }
+.sector-card.s4::before { background:linear-gradient(90deg, var(--accent4), var(--cyan)); }
+.sector-card .sc-icon { font-size:2rem; margin-bottom:8px; }
+.sector-card .sc-name { font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+.sector-card .sc-sub { font-size:0.8rem; color:var(--text3); margin-bottom:12px; }
+.sector-card .sc-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
+.sector-card .sc-stat { text-align:center; }
+.sector-card .sc-stat .val { font-size:1.2rem; font-weight:700; }
+.sector-card .sc-stat .val.cn { color:var(--cn-red); }
+.sector-card .sc-stat .val.hk { color:var(--hk-blue); }
+.sector-card .sc-stat .label { font-size:0.7rem; color:var(--text3); margin-top:2px; }
+.sector-card .sc-count { font-size:0.75rem; color:var(--text3); margin-top:10px; }
+.cmp-row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-size:0.78rem; }
+.cmp-row .cmp-label { color:var(--text3); }
+.cmp-row .cmp-val { font-weight:600; }
+
+/* Sector Section */
+.sector-section { margin-bottom:44px; }
+.sector-section h2 { font-size:1.35rem; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:10px; }
+.sector-section .ss-desc { color:var(--text2); font-size:0.85rem; margin-bottom:16px; line-height:1.6; }
+.chip { display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; }
+.chip-1 { background:rgba(168,85,247,0.15); color:var(--accent1); }
+.chip-2 { background:rgba(59,130,246,0.15); color:var(--accent2); }
+.chip-3 { background:rgba(249,115,22,0.15); color:var(--accent3); }
+.chip-4 { background:rgba(34,197,94,0.15); color:var(--accent4); }
+
+/* Market badge */
+.mkt-cn { display:inline-block; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:700; background:rgba(239,68,68,0.12); color:var(--cn-red); }
+.mkt-hk { display:inline-block; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:700; background:rgba(59,130,246,0.12); color:var(--hk-blue); }
+.mkt-label { font-size:0.85rem; font-weight:600; margin:16px 0 8px; display:flex; align-items:center; gap:8px; }
+
+/* Stock table */
+.stock-table-wrap { overflow-x:auto; margin-bottom:12px; }
+.stock-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+.stock-table th { text-align:left; padding:9px 12px; color:var(--text3); font-weight:600; font-size:0.76rem; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid var(--border); white-space:nowrap; }
+.stock-table td { padding:10px 12px; border-bottom:1px solid var(--border); white-space:nowrap; }
+.stock-table tr:hover td { background:var(--bg-hover); }
+.stock-table .st-name { font-weight:600; color:var(--text); }
+.stock-table .st-code { font-size:0.73rem; color:var(--text3); }
+.st-up { color:var(--green); font-weight:600; }
+.st-down { color:var(--red); font-weight:600; }
+.st-neutral { color:var(--text2); }
+.badge-rank { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; font-size:0.72rem; font-weight:700; }
+.badge-rank.gold { background:rgba(245,158,11,0.2); color:#f59e0b; }
+.badge-rank.silver { background:rgba(168,170,174,0.2); color:#a8aaae; }
+.badge-rank.bronze { background:rgba(205,127,50,0.2); color:#cd7f32; }
+.badge-rank.normal { color:var(--text3); }
+
+/* Charts */
+.charts-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(460px, 1fr)); gap:20px; margin-bottom:36px; }
+.chart-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px; }
+.chart-card h3 { font-size:0.95rem; font-weight:600; color:var(--text2); margin-bottom:14px; }
+.canvas-wrap { position:relative; width:100%; height:340px; }
+.canvas-wrap.tall { height:430px; }
+
+/* Summary */
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(440px, 1fr)); gap:20px; margin-bottom:32px; }
+.summary-card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px; }
+.summary-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:14px; }
+.summary-card .sm-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.88rem; }
+.summary-card .sm-row:last-child { border-bottom:none; }
+.summary-card .sm-label { color:var(--text2); }
+.summary-card .sm-val { font-weight:600; }
+
+.disclaimer { text-align:center; color:var(--text3); font-size:0.75rem; padding:20px 0; border-top:1px solid var(--border); margin-top:32px; }
+
+/* A股 vs 港股 vs 美股 color indicators */
+.compare-bar { display:flex; gap:8px; font-size:0.75rem; margin-bottom:8px; }
+.compare-bar span { display:flex; align-items:center; gap:4px; }
+.cmp-a { color:var(--cn-red); }
+.cmp-hk { color:var(--hk-blue); }
+.cmp-us { color:var(--purple); }
+
+@media (max-width:768px) {
+  .sector-overview { grid-template-columns:1fr; }
+  .charts-row { grid-template-columns:1fr; }
+  .summary-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="page-header">
+  <div class="date-badge">📅 2026年6月18日（周四）实时数据 · 美股四大主线 → A股/港股对标</div>
+  <h1>🇨🇳🇭🇰 美股四大主线 · A股港股板块对标</h1>
+  <p>从美股2026最强板块出发——AI存储、AI互联、AI算力基础设施、AI能源革命——全景扫描A股与港股的映射标的，揭示三地市场产业联动与估值差异</p>
+</div>
+
+<div class="nav-links">
+  <a href="https://vandave1966.github.io/portfolio-diagnosis/">📊 三市场诊断</a>
+  <a href="https://vandave1966.github.io/portfolio-diagnosis/pnl-analysis.html">💰 盈亏分析</a>
+  <a href="https://vandave1966.github.io/portfolio-diagnosis/us-sector-comparison.html">🇺🇸 美股板块</a>
+  <a href="#" class="active">🇨🇳 A股/港股对标</a>
+</div>
+
+<!-- Narrative -->
+<div class="narrative">
+  <h3>💡 华尔街已经给出答案：未来3年最赚钱的，不是AI应用</h3>
+  <p>2026年美股涨幅最疯狂的股票（SNDK +788%、MU +281%、WDC +313%），揭示了一个简单而残酷的事实：<strong>AI时代最赚钱的公司，往往不是造AI的，而是给AI卖铲子、卖电、卖存储、卖网络的人。</strong>就像1849年淘金热——淘金的人未必发财，卖铲子的人最先发财。以下四大主线，是华尔街用真金白银投出的答案，也是A股与港股投资者正在寻找的下一轮产业机会。</p>
+</div>
+
+<!-- Sector Overview Cards -->
+<div class="sector-overview" id="overview-cards"></div>
+
+<!-- Charts Row 1 -->
+<div class="charts-row">
+  <div class="chart-card">
+    <h3>📈 四大板块 A股 vs 港股 均值YTD回报对比</h3>
+    <div class="canvas-wrap"><canvas id="ytdCompareChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>💰 四大板块 A股 vs 港股 总市值对比（亿元）</h3>
+    <div class="canvas-wrap"><canvas id="mcapCompareChart"></canvas></div>
+  </div>
+</div>
+
+<!-- Sector Detail Sections -->
+<div id="sec1" class="sector-section">
+  <h2><span class="chip chip-1">主线 1</span> 🧠 AI存储 — 2026最大黑马</h2>
+  <p class="ss-desc">美股今年最疯狂：SNDK +788%、MU +281%、WDC +313%。AI训练带来海量数据需求，HBM、DRAM、NAND需求爆发。A股佰维存储(+237%YTD)与兆易创新(+195%YTD)表现最接近美股存储逻辑，港股华虹半导体(+126%YTD)受益于芯片产能需求。</p>
+  <div class="compare-bar"><span class="cmp-us">🟣 美股代表：SNDK/MU/WDC/STX</span><span class="cmp-a">🔴 A股映射</span><span class="cmp-hk">🔵 港股映射</span></div>
+  <div class="stock-table-wrap" id="sec1-tables"></div>
+</div>
+
+<div id="sec2" class="sector-section">
+  <h2><span class="chip chip-2">主线 2</span> 🔗 AI互联/光通信 — 最易被忽视</h2>
+  <p class="ss-desc">GPU不是瓶颈，GPU之间连接才是。美股代表Astera Labs(+40%以上)和Credo(+43%)持续新高。A股中际旭创(+125%YTD)和天孚通信(+133%YTD)强势领跑光通信赛道，太辰光(+132%YTD)紧随其后。港股长飞光纤(+321%YTD)是今年最大赢家。</p>
+  <div class="compare-bar"><span class="cmp-us">🟣 美股代表：ALAB/MRVL/CRDO/CIEN</span><span class="cmp-a">🔴 A股映射</span><span class="cmp-hk">🔵 港股映射</span></div>
+  <div class="stock-table-wrap" id="sec2-tables"></div>
+</div>
+
+<div id="sec3" class="sector-section">
+  <h2><span class="chip chip-3">主线 3</span> ☁️ AI算力基础设施 — 云基础设施爆发</h2>
+  <p class="ss-desc">2024年炒GPU，2025年炒数据中心，2026年炒AI云基础设施。美股CoreWeave(+40%以上)和Dell领涨。A股工业富联(+27%YTD)作为AI服务器龙头最受益，浪潮信息近期从高点回落仍具长期价值。港股三大运营商市值巨大但弹性偏弱。</p>
+  <div class="compare-bar"><span class="cmp-us">🟣 美股代表：CRWV/DELL/SMCI</span><span class="cmp-a">🔴 A股映射</span><span class="cmp-hk">🔵 港股映射</span></div>
+  <div class="stock-table-wrap" id="sec3-tables"></div>
+</div>
+
+<div id="sec4" class="sector-section">
+  <h2><span class="chip chip-4">主线 4</span> ⚡ AI能源革命 — 国内最易忽略</h2>
+  <p class="ss-desc">AI消耗电力的速度远超预期。华尔街已开始押注AI最终是电力行业的牛市。美股GE Vernova、Generac(+65%)、Bloom Energy领涨。A股中国西电(+68%YTD)和港股华润电力(+11%YTD)是本赛道领头羊，但电力板块整体增速不及美股对标。</p>
+  <div class="compare-bar"><span class="cmp-us">🟣 美股代表：GEV/BE/GNRC/VST</span><span class="cmp-a">🔴 A股映射</span><span class="cmp-hk">🔵 港股映射</span></div>
+  <div class="stock-table-wrap" id="sec4-tables"></div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="charts-row">
+  <div class="chart-card">
+    <h3>📊 全部27只个股 YTD 回报率排名（横条图）</h3>
+    <div class="canvas-wrap tall"><canvas id="allYtdBar"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>📉 PE估值 vs YTD回报 · 四大板块散点图</h3>
+    <div class="canvas-wrap tall"><canvas id="peVsYtd"></canvas></div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary-grid" id="summary-cards"></div>
+
+<div class="disclaimer">
+  ⚠️ 声明：本页面数据来源于公开市场实时行情，仅供信息参考，不构成任何投资建议。A股/港股/美股市值单位均为本地货币。投资有风险，决策需谨慎。<br>
+  数据来源：腾讯自选股 | 生成时间：2026年6月18日 16:30 HKT
+</div>
+
+</div>
+
+<script>
+// ====== Data ======
+var sectors = [
+  {
+    id: 1, name: 'AI存储', icon: '🧠', cls: 's1',
+    usRep: 'SNDK/MU/WDC/STX', usYtd: '+415%',
+    descA: '中国NOR Flash/SRAM/DRAM/存储制造链',
+    descHk: '港股芯片代工/国产存储扩产受益',
+    aStocks: [
+      {rank:1,name:'佰维存储',code:'688525',price:'386.20',chg:'+4.38',pe:'46.1',pb:'21.3',mcap:'1821',chg5d:'+19.2',chg20d:'+28.4',chg60d:'+61.8',ytd:'+237.1',hi52:'392.2',fromHi:'-1.5'},
+      {rank:2,name:'兆易创新',code:'603986',price:'629.00',chg:'+7.33',pe:'153.4',pb:'17.8',mcap:'4410',chg5d:'+30.1',chg20d:'+45.9',chg60d:'+117.3',ytd:'+194.6',hi52:'644.6',fromHi:'-2.4'},
+      {rank:3,name:'深科技',code:'000021',price:'44.04',chg:'+2.63',pe:'57.8',pb:'5.3',mcap:'693',chg5d:'+12.7',chg20d:'+21.8',chg60d:'+45.5',ytd:'+75.7',hi52:'46.8',fromHi:'-5.9'},
+      {rank:4,name:'北京君正',code:'300223',price:'186.05',chg:'+8.36',pe:'144.8',pb:'7.1',mcap:'900',chg5d:'+27.9',chg20d:'+42.3',chg60d:'+55.5',ytd:'+75.7',hi52:'190.6',fromHi:'-2.4'}
+    ],
+    hkStocks: [
+      {rank:1,name:'华虹半导体',code:'01347',price:'HK$168.10',chg:'+5.59',pe:'517.3',pb:'5.5',mcap:'2921',chg5d:'+20.7',chg20d:'+26.6',chg60d:'+88.0',ytd:'+126.2',hi52:'177.7',fromHi:'-5.4'},
+      {rank:2,name:'中芯国际',code:'00981',price:'HK$76.50',chg:'+0.99',pe:'112.6',pb:'3.6',mcap:'6130',chg5d:'+4.4',chg20d:'+1.8',chg60d:'+28.0',ytd:'+7.1',hi52:'93.5',fromHi:'-18.2'}
+    ]
+  },
+  {
+    id: 2, name: 'AI互联/光通信', icon: '🔗', cls: 's2',
+    usRep: 'ALAB/MRVL/CRDO/CIEN', usYtd: '+150%',
+    descA: 'A股光模块/光器件龙头',
+    descHk: '港股通信设备/光纤龙头',
+    aStocks: [
+      {rank:1,name:'天孚通信',code:'300394',price:'336.60',chg:'+2.21',pe:'169.1',pb:'67.2',mcap:'3672',chg5d:'+14.5',chg20d:'+40.0',chg60d:'+51.4',ytd:'+132.9',hi52:'374.5',fromHi:'-10.1'},
+      {rank:2,name:'太辰光',code:'300570',price:'268.60',chg:'+0.98',pe:'213.8',pb:'34.5',mcap:'610',chg5d:'+51.3',chg20d:'+80.9',chg60d:'+125.4',ytd:'+132.4',hi52:'272.4',fromHi:'-1.4'},
+      {rank:3,name:'中际旭创',code:'300308',price:'1367.88',chg:'+7.19',pe:'102.1',pb:'44.0',mcap:'15255',chg5d:'+21.7',chg20d:'+37.7',chg60d:'+123.9',ytd:'+124.6',hi52:'1368.5',fromHi:'0.0'},
+      {rank:4,name:'新易盛',code:'300502',price:'581.48',chg:'+4.23',pe:'75.5',pb:'41.8',mcap:'8107',chg5d:'+10.6',chg20d:'+44.1',chg60d:'+71.0',ytd:'+89.4',hi52:'588.0',fromHi:'-1.1'}
+    ],
+    hkStocks: [
+      {rank:1,name:'长飞光纤',code:'06869',price:'HK$217.80',chg:'-4.14',pe:'137.6',pb:'11.2',mcap:'1803',chg5d:'-5.6',chg20d:'-5.7',chg60d:'+49.4',ytd:'+321.3',hi52:'283.0',fromHi:'-23.0'},
+      {rank:2,name:'中兴通讯',code:'00763',price:'HK$25.08',chg:'-3.61',pe:'23.7',pb:'1.4',mcap:'1200',chg5d:'-4.3',chg20d:'+2.0',chg60d:'+4.9',ytd:'-7.6',hi52:'46.5',fromHi:'-46.0'}
+    ]
+  },
+  {
+    id: 3, name: 'AI算力基础设施', icon: '☁️', cls: 's3',
+    usRep: 'CRWV/DELL/SMCI', usYtd: '+45%',
+    descA: 'A股AI服务器/算力设备龙头',
+    descHk: '港股云计算/电信运营商',
+    aStocks: [
+      {rank:1,name:'工业富联',code:'601138',price:'78.08',chg:'+7.49',pe:'38.1',pb:'8.8',mcap:'15494',chg5d:'+12.3',chg20d:'+19.2',chg60d:'+55.2',ytd:'+26.5',hi52:'85.0',fromHi:'-8.1'},
+      {rank:2,name:'紫光股份',code:'000938',price:'27.45',chg:'+0.88',pe:'36.9',pb:'5.1',mcap:'785',chg5d:'+8.6',chg20d:'-5.9',chg60d:'+5.1',ytd:'+11.9',hi52:'34.4',fromHi:'-20.3'},
+      {rank:3,name:'浪潮信息',code:'000977',price:'65.66',chg:'+1.80',pe:'37.7',pb:'4.3',mcap:'964',chg5d:'+13.5',chg20d:'-1.0',chg60d:'+10.4',ytd:'-1.3',hi52:'80.8',fromHi:'-18.7'}
+    ],
+    hkStocks: [
+      {rank:1,name:'中国移动',code:'00941',price:'HK$80.10',chg:'-0.87',pe:'11.3',pb:'1.1',mcap:'17365',chg5d:'-2.1',chg20d:'-4.7',chg60d:'+3.7',ytd:'+1.2',hi52:'86.4',fromHi:'-7.3'},
+      {rank:2,name:'中国电信',code:'00728',price:'HK$4.56',chg:'-3.18',pe:'11.6',pb:'0.8',mcap:'4173',chg5d:'-9.0',chg20d:'-16.4',chg60d:'-9.5',ytd:'-13.7',hi52:'6.19',fromHi:'-26.3'},
+      {rank:3,name:'金山云',code:'03896',price:'HK$5.25',chg:'-3.85',pe:'-21.7',pb:'2.3',mcap:'238',chg5d:'-5.2',chg20d:'-28.2',chg60d:'-32.9',ytd:'-4.7',hi52:'9.75',fromHi:'-46.2'}
+    ]
+  },
+  {
+    id: 4, name: 'AI能源革命', icon: '⚡', cls: 's4',
+    usRep: 'GEV/BE/GNRC/VST', usYtd: '+54%',
+    descA: 'A股电力设备/特高压/智能电网',
+    descHk: '港股电力运营商',
+    aStocks: [
+      {rank:1,name:'中国西电',code:'601179',price:'15.26',chg:'-3.36',pe:'59.2',pb:'3.4',mcap:'782',chg5d:'+13.4',chg20d:'-5.3',chg60d:'-6.4',ytd:'+67.7',hi52:'20.7',fromHi:'-26.1'},
+      {rank:2,name:'平高电气',code:'600312',price:'18.69',chg:'-1.68',pe:'21.6',pb:'2.2',mcap:'254',chg5d:'+3.0',chg20d:'-11.4',chg60d:'-11.1',ytd:'+7.7',hi52:'25.7',fromHi:'-27.2'},
+      {rank:3,name:'国电南瑞',code:'600406',price:'23.06',chg:'-1.11',pe:'22.3',pb:'3.5',mcap:'1852',chg5d:'+0.9',chg20d:'-10.1',chg60d:'-15.8',ytd:'+2.6',hi52:'32.1',fromHi:'-28.1'},
+      {rank:4,name:'许继电气',code:'000400',price:'22.88',chg:'-0.69',pe:'21.8',pb:'1.9',mcap:'233',chg5d:'+5.9',chg20d:'-11.8',chg60d:'-19.7',ytd:'-11.0',hi52:'34.7',fromHi:'-34.0'}
+    ],
+    hkStocks: [
+      {rank:1,name:'华润电力',code:'00836',price:'HK$18.36',chg:'-2.03',pe:'6.6',pb:'0.9',mcap:'951',chg5d:'-5.1',chg20d:'-5.3',chg60d:'+0.8',ytd:'+11.0',hi52:'21.4',fromHi:'-14.2'},
+      {rank:2,name:'中国电力',code:'02380',price:'HK$2.93',chg:'-4.25',pe:'11.3',pb:'0.8',mcap:'362',chg5d:'-8.2',chg20d:'-12.5',chg60d:'-5.8',ytd:'-3.6',hi52:'3.66',fromHi:'-19.9'}
+    ]
+  }
+];
+
+// Compute overview stats
+var overviewStats = sectors.map(function(s){
+  var aYtd = s.aStocks.reduce(function(sum,st){ return sum + parseFloat(st.ytd); }, 0) / s.aStocks.length;
+  var hkYtd = s.hkStocks.reduce(function(sum,st){ return sum + parseFloat(st.ytd); }, 0) / s.hkStocks.length;
+  var aMcap = s.aStocks.reduce(function(sum,st){ return sum + parseFloat(st.mcap); }, 0);
+  var hkMcap = s.hkStocks.reduce(function(sum,st){ return sum + parseFloat(st.mcap); }, 0);
+  return { id:s.id, name:s.name, icon:s.icon, cls:s.cls, aYtd:aYtd, hkYtd:hkYtd, aMcap:aMcap, hkMcap:hkMcap, aCnt:s.aStocks.length, hkCnt:s.hkStocks.length, usRep:s.usRep, descA:s.descA, descHk:s.descHk };
+});
+
+function fmt(val, usePlus){ return usePlus && val > 0 ? '+' + val.toFixed(1) + '%' : val.toFixed(1) + '%'; }
+function fmtMcap(v){ if(v>=10000) return '¥'+(v/10000).toFixed(2)+'万亿'; return '¥'+v.toFixed(0)+'亿'; }
+function fmtMcapHk(v){ if(v>=10000) return 'HK$'+(v/10000).toFixed(2)+'万亿'; return 'HK$'+v.toFixed(0)+'亿'; }
+function clsN(v){ return v>0?'st-up':(v<0?'st-down':'st-neutral'); }
+function fmtChg(v){ return (v>0?'+':'')+v+'%'; }
+
+// Render overview cards
+var ocHtml = '';
+for(var i=0;i<overviewStats.length;i++){
+  var o = overviewStats[i];
+  ocHtml += '<div class="sector-card '+o.cls+'" onclick="document.getElementById(\'sec'+(i+1)+'\').scrollIntoView({behavior:\'smooth\'})">';
+  ocHtml += '<div class="sc-icon">'+o.icon+'</div>';
+  ocHtml += '<div class="sc-name">'+o.name+'</div>';
+  ocHtml += '<div class="sc-sub">美股代表：'+o.usRep+'</div>';
+  ocHtml += '<div class="sc-stats">';
+  ocHtml += '<div class="sc-stat"><div class="val cn '+clsN(o.aYtd)+'">'+fmtChg(o.aYtd.toFixed(1))+'</div><div class="label">A股均值YTD</div></div>';
+  ocHtml += '<div class="sc-stat"><div class="val hk '+clsN(o.hkYtd)+'">'+fmtChg(o.hkYtd.toFixed(1))+'</div><div class="label">港股均值YTD</div></div>';
+  ocHtml += '</div>';
+  ocHtml += '<div class="sc-count">A股 '+o.aCnt+'只 · 港股 '+o.hkCnt+'只</div>';
+  ocHtml += '<div class="cmp-row"><span class="cmp-label">A股总市值</span><span class="cmp-val">'+fmtMcap(o.aMcap)+'</span></div>';
+  ocHtml += '<div class="cmp-row"><span class="cmp-label">港股总市值</span><span class="cmp-val">'+fmtMcapHk(o.hkMcap)+'</span></div>';
+  ocHtml += '</div>';
+}
+document.getElementById('overview-cards').innerHTML = ocHtml;
+
+// Render sector tables
+function tableHtml(stocks, isHk){
+  var th = '<thead><tr><th>#</th><th>名称</th><th>代码</th><th>现价</th><th>今日</th><th>PE</th><th>PB</th><th>市值('+(isHk?'港元':'¥')+'亿)</th><th>5日%</th><th>20日%</th><th>60日%</th><th>YTD%</th><th>52周高</th><th>距高点</th></tr></thead>';
+  var tb = '<tbody>';
+  for(var i=0;i<stocks.length;i++){
+    var s = stocks[i];
+    var rc = s.rank===1?'gold':(s.rank===2?'silver':(s.rank===3?'bronze':'normal'));
+    tb += '<tr>';
+    tb += '<td><span class="badge-rank '+rc+'">'+s.rank+'</span></td>';
+    tb += '<td><div class="st-name">'+s.name+'</div><div class="st-code">'+s.code+'</div></td>';
+    tb += '<td class="st-code">'+s.code+'</td>';
+    tb += '<td style="font-weight:600">'+s.price+'</td>';
+    var chgNum = parseFloat(s.chg);
+    tb += '<td class="'+(chgNum>0?'st-up':(chgNum<0?'st-down':'st-neutral'))+'">'+s.chg+'%</td>';
+    tb += '<td>'+s.pe+'</td>';
+    tb += '<td>'+s.pb+'</td>';
+    tb += '<td>'+s.mcap+'</td>';
+    var c5 = parseFloat(s.chg5d);
+    tb += '<td class="'+clsN(c5)+'">'+s.chg5d+'%</td>';
+    var c20 = parseFloat(s.chg20d);
+    tb += '<td class="'+clsN(c20)+'">'+s.chg20d+'%</td>';
+    var c60 = parseFloat(s.chg60d);
+    tb += '<td class="'+clsN(c60)+'">'+s.chg60d+'%</td>';
+    var ytd = parseFloat(s.ytd);
+    tb += '<td class="'+(ytd>20?'st-up':(ytd<-10?'st-down':'st-neutral'))+'">'+s.ytd+'%</td>';
+    tb += '<td class="st-code">'+s.hi52+'</td>';
+    var fh = parseFloat(s.fromHi);
+    tb += '<td class="'+(fh<=-5?'st-down':(fh>=-1?'st-up':'st-neutral'))+'">'+s.fromHi+'%</td>';
+    tb += '</tr>';
+  }
+  tb += '</tbody>';
+  return '<table class="stock-table">'+th+tb+'</table>';
+}
+
+for(var i=0;i<sectors.length;i++){
+  var sec = sectors[i];
+  var html = '<div class="mkt-label"><span class="mkt-cn">A股</span> '+sec.descA+'</div>';
+  html += tableHtml(sec.aStocks, false);
+  html += '<div class="mkt-label" style="margin-top:16px"><span class="mkt-hk">港股</span> '+sec.descHk+'</div>';
+  html += tableHtml(sec.hkStocks, true);
+  document.getElementById('sec'+(i+1)+'-tables').innerHTML = html;
+}
+
+// Render summary
+var sumHtml = '<div class="summary-card"><h3>🏆 四大主线 · A股 vs 港股 YTD对比</h3>';
+for(var i=0;i<overviewStats.length;i++){
+  var o = overviewStats[i];
+  sumHtml += '<div class="sm-row"><span class="sm-label">'+o.icon+' '+o.name+' A股均值</span><span class="sm-val '+clsN(o.aYtd)+'">'+fmtChg(o.aYtd.toFixed(1))+'</span></div>';
+  sumHtml += '<div class="sm-row"><span class="sm-label">'+o.icon+' '+o.name+' 港股均值</span><span class="sm-val '+clsN(o.hkYtd)+'">'+fmtChg(o.hkYtd.toFixed(1))+'</span></div>';
+  if(i<3) sumHtml += '<div style="height:6px"></div>';
+}
+sumHtml += '<div class="sm-row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px;"><span class="sm-label">🏅 A股最强板块</span><span class="sm-val st-up">AI存储 +145.8%均值YTD</span></div>';
+sumHtml += '<div class="sm-row"><span class="sm-label">🏅 港股最强板块</span><span class="sm-val st-up">AI互联 +156.8%均值YTD</span></div>';
+sumHtml += '<div class="sm-row"><span class="sm-label">📉 A股最弱板块</span><span class="sm-val st-down">AI算力 +12.3%均值YTD</span></div>';
+sumHtml += '<div class="sm-row"><span class="sm-label">📉 港股最弱板块</span><span class="sm-val st-down">AI算力 -5.8%均值YTD</span></div>';
+sumHtml += '</div>';
+
+sumHtml += '<div class="summary-card"><h3>💡 关键洞察 · 三地市场联动</h3>';
+sumHtml += '<div class="sm-row"><span class="sm-label">🧠 AI存储</span><span class="sm-val">A股紧跟美股逻辑，佰维/兆易创新涨势接近美股存储股</span></div>';
+sumHtml += '<div class="sm-row"><span class="sm-label">🔗 AI互联</span><span class="sm-val">港股长飞光纤+321%YTD远超所有A股，但中兴-8%拖后腿</span></div>';
+sumHtml += '<div class="sm-row"><span class="sm-label">☁️ AI算力</span><span class="sm-val">三地均表现平平，A股工业富联+27%最佳，港股运营商YTD全负</span></div>';
+sumHtml += '<div class="sm-row"><span class="sm-label">⚡ AI能源</span><span class="sm-val">A股中国西电+68%独领风骚，电力板块近期回调明显</span></div>';
+sumHtml += '<div class="sm-row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:12px;"><span class="sm-label">⚠️ 最大预期差</span><span class="sm-val st-down">港股AI算力赛道严重落后美股，运营商估值低但缺催化剂</span></div>';
+sumHtml += '</div>';
+document.getElementById('summary-cards').innerHTML = sumHtml;
+
+// ===== Charts =====
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+// Chart 1: YTD comparison A-share vs HK
+new Chart(document.getElementById('ytdCompareChart'), {
+  type: 'bar',
+  data: {
+    labels: overviewStats.map(function(o){return o.icon+' '+o.name;}),
+    datasets: [
+      { label: 'A股均值YTD', data: overviewStats.map(function(o){return o.aYtd;}), backgroundColor: 'rgba(239,68,68,0.7)', borderColor: '#ef4444', borderWidth: 1, borderRadius: 6 },
+      { label: '港股均值YTD', data: overviewStats.map(function(o){return o.hkYtd;}), backgroundColor: 'rgba(59,130,246,0.7)', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { usePointStyle: true, padding: 16 } } },
+    scales: {
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: function(v){return v+'%';} } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Chart 2: Market cap comparison
+new Chart(document.getElementById('mcapCompareChart'), {
+  type: 'bar',
+  data: {
+    labels: overviewStats.map(function(o){return o.icon+' '+o.name;}),
+    datasets: [
+      { label: 'A股总市值(亿¥)', data: overviewStats.map(function(o){return o.aMcap;}), backgroundColor: 'rgba(239,68,68,0.7)', borderColor: '#ef4444', borderWidth: 1, borderRadius: 6 },
+      { label: '港股总市值(亿HK$)', data: overviewStats.map(function(o){return o.hkMcap;}), backgroundColor: 'rgba(59,130,246,0.7)', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { usePointStyle: true, padding: 16 } } },
+    scales: {
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: function(v){return v>=10000?(v/10000).toFixed(1)+'万':v;} } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Chart 3: All stocks YTD bar
+var allStocks = [];
+function getColor(mkt){return mkt==='A'?'rgba(239,68,68,0.7)':'rgba(59,130,246,0.7)';}
+function getBorder(mkt){return mkt==='A'?'#ef4444':'#3b82f6';}
+for(var i=0;i<sectors.length;i++){
+  var s = sectors[i];
+  for(var j=0;j<s.aStocks.length;j++) allStocks.push({name:s.aStocks[j].name+'('+s.aStocks[j].code+')',ytd:parseFloat(s.aStocks[j].ytd),mkt:'A',sec:s.id});
+  for(var k=0;k<s.hkStocks.length;k++) allStocks.push({name:s.hkStocks[k].name+'('+s.hkStocks[k].code+')',ytd:parseFloat(s.hkStocks[k].ytd),mkt:'HK',sec:s.id});
+}
+allStocks.sort(function(a,b){return b.ytd - a.ytd;});
+var secColors = ['#a855f7','#3b82f6','#f97316','#22c55e'];
+new Chart(document.getElementById('allYtdBar'), {
+  type: 'bar',
+  data: {
+    labels: allStocks.map(function(s){return s.name;}),
+    datasets: [{
+      label: 'YTD回报率',
+      data: allStocks.map(function(s){return s.ytd;}),
+      backgroundColor: allStocks.map(function(s){return secColors[s.sec-1]+'99';}),
+      borderColor: allStocks.map(function(s){return secColors[s.sec-1];}),
+      borderWidth: 1,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: function(v){return v+'%';} } },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// Chart 4: PE vs YTD scatter
+var peYtdData = [];
+for(var i=0;i<sectors.length;i++){
+  var s = sectors[i];
+  for(var j=0;j<s.aStocks.length;j++){
+    var st = s.aStocks[j];
+    peYtdData.push({name:st.name,pe:parseFloat(st.pe),ytd:parseFloat(st.ytd),mkt:'A股',sec:s.id});
+  }
+  for(var k=0;k<s.hkStocks.length;k++){
+    var hst = s.hkStocks[k];
+    peYtdData.push({name:hst.name,pe:parseFloat(hst.pe),ytd:parseFloat(hst.ytd),mkt:'港股',sec:s.id});
+  }
+}
+var scDatasets = [];
+for(var si=1;si<=4;si++){
+  var aD = peYtdData.filter(function(d){return d.sec===si && d.mkt==='A股';});
+  var hkD = peYtdData.filter(function(d){return d.sec===si && d.mkt==='港股';});
+  scDatasets.push({
+    label: '主线'+si+' A股',
+    data: aD.map(function(d){return {x:d.pe, y:d.ytd, name:d.name};}),
+    backgroundColor: secColors[si-1]+'aa',
+    borderColor: secColors[si-1],
+    borderWidth: 1,
+    pointRadius: 6,
+    pointHoverRadius: 9
+  });
+  scDatasets.push({
+    label: '主线'+si+' 港股',
+    data: hkD.map(function(d){return {x:d.pe, y:d.ytd, name:d.name};}),
+    backgroundColor: secColors[si-1]+'55',
+    borderColor: secColors[si-1],
+    borderWidth: 1,
+    borderDash: [4,4],
+    pointRadius: 6,
+    pointHoverRadius: 9,
+    pointStyle: 'triangle'
+  });
+}
+new Chart(document.getElementById('peVsYtd'), {
+  type: 'scatter',
+  data: { datasets: scDatasets },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { usePointStyle: true, padding: 12, font: { size: 11 } } },
+      tooltip: { callbacks: { label: function(ctx){return ctx.raw.name+': PE='+ctx.raw.x.toFixed(0)+' YTD='+ctx.raw.y.toFixed(1)+'%';} } }
+    },
+    scales: {
+      x: { title: { display: true, text: 'PE(TTM)' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { title: { display: true, text: 'YTD回报率(%)' }, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: function(v){return v+'%';} } }
+    }
+  }
+});
+</script>
+</body>
+</html>
